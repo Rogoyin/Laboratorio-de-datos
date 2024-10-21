@@ -59,6 +59,17 @@ Destino = sorted(list(Migrantes['Country Dest Code'].unique()))
 
 assert Origen == Destino, "Error: los países de Origen y Destino contienen alguna diferencia"
 
+# Verificamos si cada país aparece la misma cantidad de veces en cada columna
+from collections import Counter
+
+Paises_Origen = list(Migrantes['Country Origin Code'])
+Paises_Destino = list(Migrantes['Country Dest Code'])
+
+Frecuencias_Origen = Counter(Paises_Origen)
+Frecuencias_Destino = Counter(Paises_Destino)
+
+assert Frecuencias_Origen == Frecuencias_Destino, "No aparecen la misma cantidad de veces los países."
+
 # Cambiamos los nombres de los atributos para que no haya espacios y sea más legible
 Nuevos_Nombres = {'Country Origin Code': 'id_pais_origen',
                   'Country Dest Code': 'id_pais_destino',
@@ -76,6 +87,13 @@ Columnas_Numericas = ['cantidad_en_1960', 'cantidad_en_1970', 'cantidad_en_1980'
 
 for Columna in Columnas_Numericas:
     Migrantes[Columna] = pd.to_numeric(Migrantes[Columna], errors='coerce')
+
+# Reemplazamos los NULLS con 0. Esto es porque en la tabla había "." para cuando no había habido migraciones en ninguna de las columnas numéricas, por lo que 0 es un relleno correcto.
+for Columna in Columnas_Numericas:
+    Migrantes[Columna] = Migrantes[Columna].fillna(0)
+
+# Hay una fila que tiene a ARG de los dos lados: la borramos
+Migrantes = Migrantes[~((Migrantes['id_pais_origen'] == 'ARG') & (Migrantes['id_pais_destino'] == 'ARG'))]
 
 # Creamos cinco DataFrames, cada uno representando dado un origen y un destino, la cantidad de migrantes en un año específico (le agregamos una columna con el año correspondiente).
 # Luego, los filtramos: nos quedamos sólo con las filas con valores mayores a 0, es decir, con filas que tengan migrantes. 
@@ -125,3 +143,12 @@ assert Duplicados.size == 0, "Error: con clave {id_pais, anio} existen duplicado
 # Migrantes.to_csv('Tablas/TABLA. Migrantes.csv', index=False)
 
 Migrantes_.to_csv('Tablas/TABLA. Migrantes - Diseño 2.csv', index=False)
+
+
+
+'''
+    Etapa 2: Creación de la tabla Regiones
+'''
+
+
+
