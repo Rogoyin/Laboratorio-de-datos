@@ -3,7 +3,7 @@
     
     Prerrequisitos:
         Los archivos necesarios descritos en el enunciado del Trabajo Práctico estarán ubicados dentro de la carpeta Materiales/
-            - Migraciones.csv
+            - datos_migraciones.csv
             - lista-sedes-datos.csv*
             - lista-secciones.csv
         *) Es importante antes de usar el script corregir la linea 16 de lista-sedes-datos.csv:
@@ -13,7 +13,7 @@
     Descripción:
         El script toma los archivos provistos y en base a ellos crea nuevas tablas basadas en el modelo DER que especificamos en el informe.
         Las etapas son:
-            1) Creación de tabla Migrantes.csv (basado en Migraciones.csv)
+            1) Creación de tabla Migrantes.csv (basado en datos_migraciones.csv)
             2) Creación de tabla Regiones.csv (basado en lista-sedes-datos.csv)
 
     Ejecución:
@@ -24,7 +24,7 @@ import pandas as pd
 
 # Carga de datasets
 Ruta = 'Materiales/'
-Dataset_Migraciones = 'Migraciones.csv'
+Dataset_Migraciones = 'datos_migraciones.csv'
 Dataset_Sedes = 'lista-sedes-datos.csv'
 Dataset_Secciones = 'lista-secciones.csv'
 
@@ -94,6 +94,12 @@ for Columna in Columnas_Numericas:
 for Columna in Columnas_Numericas:
     Migrantes[Columna] = Migrantes[Columna].fillna(0)
 
+# Por si acaso, borramos espacios entre palabras al principio y al final
+Columnas_String = ['id_pais_origen', 'id_pais_destino']
+
+for Columna in Columnas_String:
+    Migrantes[Columna] = Migrantes[Columna].str.strip().str.replace(r'\s+', ' ', regex=True)
+
 # Hay una fila que tiene a ARG de los dos lados: la borramos
 Migrantes = Migrantes[~((Migrantes['id_pais_origen'] == 'ARG') & (Migrantes['id_pais_destino'] == 'ARG'))]
 
@@ -104,14 +110,13 @@ Migrantes = Migrantes[~((Migrantes['id_pais_origen'] == 'ARG') & (Migrantes['id_
 DataFrames_Cantidades = []
 
 for Columna in Columnas_Numericas:
-    DataFrame = Migrantes[['id_pais_origen', 'id_pais_destino', Columna]]    # Filtrado de columnas.
-    DataFrame = DataFrame[DataFrame[Columna] > 0]                            # Filtrado de filas.
-    DataFrame['anio'] = Columna[-4:len(Columna)+1]                           # Crear columna con el año.    
-    DataFrame = DataFrame.reset_index(drop=True)                             # Resetear índices.
-    DataFrame = DataFrame.rename(columns={Columna: 'migrantes'})             # Renombrar columna.
-    DataFrames_Cantidades.append(DataFrame)                                  # Agregar df a lista de dfs.
+    DataFrame = Migrantes[['id_pais_origen', 'id_pais_destino', Columna]].copy()    # Filtrado de columnas.
+    DataFrame['anio'] = Columna[-4:len(Columna)+1]                                  # Crear columna con el año.    
+    DataFrame = DataFrame.reset_index(drop=True)                                    # Resetear índices.
+    DataFrame = DataFrame.rename(columns={Columna: 'migrantes'})                    # Renombrar columna.
+    DataFrames_Cantidades.append(DataFrame)                                         # Agregar df a lista de dfs.
 
-Migrantes = pd.concat(DataFrames_Cantidades)
+Migrantes = pd.concat(DataFrames_Cantidades).reset_index(drop=True)
 
 # Construimos un DataFrame para los migrantes que ingresaron a la Argentina desde otro país (serán considerados Inmigrantes).
 Inmigrantes = Migrantes[Migrantes['id_pais_destino'] == 'ARG'].copy()
@@ -181,12 +186,16 @@ Regiones.to_csv('Tablas/Regiones.csv', index=False)
     Etapa 3: Creación de la tabla Paises
 '''
 
-# Usamos los códigos y nombres de la base de datos "Migraciones.csv", ya que son más exhaustivos que los de las otras tablas. 
+# Usamos los códigos y nombres de la base de datos "datos_migraciones.csv", ya que son más exhaustivos que los de las otras tablas. 
 # El procedimiento para encontrar los valores únicos es:
 #   1. Armar tres DataFrames: uno con los países de origen -código y nombre-, otro con los países de destino -código y nombre- 
 #       y otro con los países de "Sedes". De esa forma obtenemos todos los países que están en una u otra columna pero no en las otras.
 #   2. Concatenarlos verticalmente, llamando las columnas "id" (el código ISO del país) y "nombre". Este DataFrame se llamará Países.
 #   3. Se eliminan las filas con valores duplicados en la columna "id".
+#
+# Importante: la tabla final contendrá NaNs en la clave foránea id_region. Esto fue una decisión que tomamos para permitir que los id
+#   (los códigos ISO de países) sean completos pese a que en los datasets con los que trabajamos no todos los países tenían definida la región
+#   geográfica. Optamos por dejarlo así en lugar de corregirlo manualmente o usar otro dataset de internet (fuera de los límites del TP, haríamos esto último).
 
 Paises_Origen = Migraciones_DB[['Country Origin Code', 'Country Origin Name']]
 Paises_Destino = Migraciones_DB[['Country Dest Code', 'Country Dest Name']]
@@ -217,7 +226,8 @@ Paises = Paises[~(Paises['id'] == 'zzz')]
 for Columna in Paises.columns:
     Paises[Columna] = Paises[Columna].str.strip().str.replace(r'\s+', ' ', regex=True)
 
-# Filtramos los valores repetidos de las columna "id". Además, reseteamos el índice
+# Quitamos el valor NaN. Filtramos los valores repetidos de las columna "id". Además, reseteamos el índice
+Paises = Paises.dropna(subset=['id'])
 Paises = Paises.drop_duplicates(subset=['id']).reset_index(drop=True)
 
 # Eliminamos los duplicados en la columna "pais_iso_3" en el DataFrame "Sedes". Esto es para que no se generen filas de más en el join
@@ -239,7 +249,82 @@ Paises = pd.merge(Paises, Regiones, left_on='region_geografica', right_on='nombr
 Paises = Paises[['id_x', 'nombre_x', 'id_y']]
 Paises = Paises.rename(columns={'id_x': 'id', 'nombre_x': 'nombre', 'id_y': 'id_region'})
 
-########## SOLUCIONAR TEMA CON LOS NULLS
+# Verificamos que no hay nulos en la columna 'id'; los removemos
+Paises = Paises.dropna(subset='id')
 
+# Ordenamos alfabéticamente por id
+Paises = Paises.sort_values(by='id').reset_index(drop=True)
+
+# Chequeamos que no hay duplicados en la clave primaria.
+Duplicados = Paises[Paises.duplicated(subset=['id'], keep=False)]
+assert Duplicados.size == 0, "Error: con clave { id } existen duplicados en la tabla Pais"
+
+# Guardamos la tabla en un archivo .csv
+Paises.to_csv('Tablas/Paises.csv', index=False)
+
+
+
+'''
+    Etapa 4: Creación de la tabla Sedes
+'''
+
+# Se extraen del dataset "Sedes". Nos quedamos con las columnas que nos interesan y conforman los atributos
+Sedes = Sedes_DB[['sede_id', 'sede_desc_castellano', 'pais_iso_3']]
+
+# Cambiamos los nombres de las columnas
+Sedes = Sedes.rename(columns={'sede_id': 'id', 'pais_iso_3': 'id_pais', 'sede_desc_castellano': 'nombre'})
+
+# Borramos espacios adicionales
+for Columna in Sedes.columns:
+    Sedes[Columna] = Sedes[Columna].str.strip().str.replace(r'\s+', ' ', regex=True)
+
+# Verificamos que no hay nulos en la columna 'id'; los removemos
+Sedes = Sedes.dropna(subset='id')
+
+# Ordenamos alfabéticamente por id
+Sedes = Sedes.sort_values(by='id').reset_index(drop=True)
+
+# Chequeamos que no hay duplicados en la clave primaria.
+Duplicados = Sedes[Sedes.duplicated(subset=['id', 'nombre'], keep=False)]
+assert Duplicados.size == 0, "Error: con clave { id } existen duplicados en la tabla Pais"
+
+# Guardamos la tabla en un archivo .csv
+Sedes.to_csv('Tablas/Sedes.csv', index=False)
+
+
+
+
+'''
+    Etapa 5: Creación de la tabla Secciones
+'''
+# Para armar esta tabla utilizamos el dataset "Secciones.csv"
+# Importante: tomamos la decisión de que la clave primaria sea { id_sede, nombre } aunque haya habido tres casos particulares en los que
+#   a igual id_sede y nombre (de sección), habían dos secciones diferentes. Entendemos que estamos restando un total de tres registros al remover 
+#   duplicados y perdiendo un mínimo de información con tal que el modelo sea sólido respecto de lo que representa (no entendemos que sea necesario
+#   agregar un tercer atributo en la clave principal sólo por tener que distinguir esos tres casos).
+
+# Quitamos las columnas que no sirven y cambiamos los nombres de los atributos
+Secciones = Secciones_DB[['sede_id', 'sede_desc_castellano']]
+Secciones = Secciones.rename(columns={'sede_id': 'id_sede', 'sede_desc_castellano': 'nombre'})
+
+# Borramos espacios adicionales
+for Columna in Secciones.columns:
+    Secciones[Columna] = Secciones[Columna].str.strip().str.replace(r'\s+', ' ', regex=True)
+
+# Verificamos que no hay nulos en la columna 'id'; los removemos
+Secciones = Secciones.dropna(subset='id_sede')
+
+# Chequeo de si no hay valores duplicados en la clave
+Secciones = Secciones.drop_duplicates(subset=['id_sede', 'nombre'], keep=False)
+
+# Ordenamos alfabéticamente por id
+Secciones = Secciones.sort_values(by='id_sede').reset_index(drop=True)
+
+# Chequeamos que no hay duplicados en la clave primaria.
+Duplicados = Secciones[Secciones.duplicated(subset=['id_sede', 'nombre'], keep=False)]
+assert Duplicados.size == 0, "Error: con clave { id } existen duplicados en la tabla Pais"
+
+# Guardamos la tabla en un archivo .csv
+Secciones.to_csv('Tablas/Secciones.csv', index=False)
 
 
