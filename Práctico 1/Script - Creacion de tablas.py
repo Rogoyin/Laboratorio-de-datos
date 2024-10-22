@@ -4,15 +4,17 @@
     Prerrequisitos:
         Los archivos necesarios descritos en el enunciado del Trabajo Práctico estarán ubicados dentro de la carpeta Materiales/
             - Migraciones.csv
-            - lista-sedes-datos.csv
+            - lista-sedes-datos.csv*
             - lista-secciones.csv
-        En el caso de lista-sedes.csv, no será utilizado ya que lista-sedes-datos.csv lo contiene en los datos que nos interesan
-    
+        *) Es importante antes de usar el script corregir la linea 16 de lista-sedes-datos.csv:
+            Remover el "", justo antes de "VII  Región  del  Maule;  VIII  Región  del  Bio  Bio;  IX  Region  de  la  Araucania;  XVI  Region  de  Ñuble"
+        **) El archivo lista-sedes.csv no será utilizado porque lista-sedes-datos.csv lo incluye en los valores que consideramos importantes
+
     Descripción:
         El script toma los archivos provistos y en base a ellos crea nuevas tablas basadas en el modelo DER que especificamos en el informe.
         Las etapas son:
             1) Creación de tabla Migrantes.csv (basado en Migraciones.csv)
-            2) Creación de tabla 
+            2) Creación de tabla Regiones.csv (basado en lista-sedes-datos.csv)
 
     Ejecución:
         Ejecutar el script en consola generará las tablas en la carpeta Output/
@@ -139,16 +141,105 @@ Duplicados = Migrantes_[Migrantes_.duplicated(subset=['id_pais', 'anio'], keep=F
 
 assert Duplicados.size == 0, "Error: con clave {id_pais, anio} existen duplicados en la tabla Migrantes"
 
-# Guardamos el archivo
-# Migrantes.to_csv('Tablas/TABLA. Migrantes.csv', index=False)
-
-Migrantes_.to_csv('Tablas/TABLA. Migrantes - Diseño 2.csv', index=False)
+# Guardamos la tabla en un archivo .csv
+Migrantes_.to_csv('Tablas/Migrantes.csv', index=False)
 
 
 
 '''
     Etapa 2: Creación de la tabla Regiones
 '''
+
+# Las regiones se extraen del Dataset_Sedes
+# Arreglamos discordancias de datos entre los códigos de países en Sedes y Migraciones (hay un typo en el código de Gran Bretaña)
+Sedes_DB['pais_iso_3'] = Sedes_DB['pais_iso_3'].replace('GRB', 'GBR')
+
+# Nos quedamos sólo con la columna region_geográfica, que es la que nos interesa
+Regiones = pd.DataFrame(Sedes_DB['region_geografica'])
+
+# Eliminamos espacios adicionales
+Regiones['region_geografica'] = Regiones['region_geografica'].str.strip().str.replace(r'\s+', ' ', regex=True)
+
+# Nos quedamos con valores únicos
+Regiones = Regiones.drop_duplicates() 
+
+# Ordenamos los registros alfabéticamente y reseteamos el índice para no generar problemas
+Regiones = Regiones.sort_values(by='region_geografica').reset_index(drop=True)
+
+# Generamos una nueva columna: id, con números identificatorios.
+Regiones['id'] = [x for x in range(1,len(Regiones)+1)]
+
+# Cambiamos los nombres de los atributos y ordenamos las columnas
+Regiones = Regiones.rename(columns = {'region_geografica': 'nombre'})
+Regiones = Regiones[['id', 'nombre']]
+
+# Guardamos la tabla en un archivo .csv
+Regiones.to_csv('Tablas/Regiones.csv', index=False)
+
+
+'''
+    Etapa 3: Creación de la tabla Paises
+'''
+
+# Usamos los códigos y nombres de la base de datos "Migraciones.csv", ya que son más exhaustivos que los de las otras tablas. 
+# El procedimiento para encontrar los valores únicos es:
+#   1. Armar tres DataFrames: uno con los países de origen -código y nombre-, otro con los países de destino -código y nombre- 
+#       y otro con los países de "Sedes". De esa forma obtenemos todos los países que están en una u otra columna pero no en las otras.
+#   2. Concatenarlos verticalmente, llamando las columnas "id" (el código ISO del país) y "nombre". Este DataFrame se llamará Países.
+#   3. Se eliminan las filas con valores duplicados en la columna "id".
+
+Paises_Origen = Migraciones_DB[['Country Origin Code', 'Country Origin Name']]
+Paises_Destino = Migraciones_DB[['Country Dest Code', 'Country Dest Name']]
+Paises_Sedes = Sedes_DB[['pais_iso_3', 'pais_castellano']]
+
+# Renombramos las columnas para que se llamen igual.
+
+Nuevos_Nombres_Origen = {'Country Origin Code': 'id',
+                         'Country Origin Name': 'nombre'}
+
+Nuevos_Nombres_Destino = {'Country Dest Code': 'id',
+                          'Country Dest Name': 'nombre'}
+
+Nuevos_Nombres_Sedes = {'pais_iso_3': 'id',
+                        'pais_castellano': 'nombre'}
+
+Paises_Origen = Paises_Origen.rename(columns = Nuevos_Nombres_Origen)
+Paises_Destino = Paises_Destino.rename(columns = Nuevos_Nombres_Destino)
+Paises_Sedes = Paises_Sedes.rename(columns = Nuevos_Nombres_Sedes)
+
+# Concatenamos verticalmente los dos DataFrames y creamos Paises
+Paises = pd.concat([Paises_Origen, Paises_Destino, Paises_Sedes], axis=0)
+
+# Removemos las filas pertenecientes a Refugiados, ya que no es un país
+Paises = Paises[~(Paises['id'] == 'zzz')]
+
+# Eliminamos espacios adicionales
+for Columna in Paises.columns:
+    Paises[Columna] = Paises[Columna].str.strip().str.replace(r'\s+', ' ', regex=True)
+
+# Filtramos los valores repetidos de las columna "id". Además, reseteamos el índice
+Paises = Paises.drop_duplicates(subset=['id']).reset_index(drop=True)
+
+# Eliminamos los duplicados en la columna "pais_iso_3" en el DataFrame "Sedes". Esto es para que no se generen filas de más en el join
+Paises_En_Sedes = Sedes_DB.drop_duplicates(subset='pais_iso_3').copy()
+
+# Removemos espacios adicionales
+for Columna in ['region_geografica', 'pais_iso_3']:
+    Paises_En_Sedes[Columna] = Paises_En_Sedes[Columna].str.strip().str.replace(r'\s+', ' ', regex=True)
+
+# Agregamos el 'id_region' correspondiente a cada país. Este se extrae del correspondiente al país en el dataset "Sedes". 
+#   Si no se encuentra, queda con valor NULL
+
+Paises = pd.merge(Paises, Paises_En_Sedes, left_on='id', right_on='pais_iso_3', how='left')[['id', 'nombre', 'region_geografica']]
+
+# Hacemos un LEFT_JOIN con el DataFrame "Regiones" para extraer los id de las regiones correspondientes
+Paises = pd.merge(Paises, Regiones, left_on='region_geografica', right_on='nombre', how='left')
+
+# Filtramos las columnas a las que necesitamos y cambiamos nombres
+Paises = Paises[['id_x', 'nombre_x', 'id_y']]
+Paises = Paises.rename(columns={'id_x': 'id', 'nombre_x': 'nombre', 'id_y': 'id_region'})
+
+########## SOLUCIONAR TEMA CON LOS NULLS
 
 
 
