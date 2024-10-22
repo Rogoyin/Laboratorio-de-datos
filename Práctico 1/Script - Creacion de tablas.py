@@ -15,9 +15,13 @@
         Las etapas son:
             1) Creación de tabla Migrantes.csv (basado en datos_migraciones.csv)
             2) Creación de tabla Regiones.csv (basado en lista-sedes-datos.csv)
+            3) Creación de tabla Paises.csv (basado en datos_migraciones.csv y lista-sedes-datos.csv)
+            4) Creación de tabla Redes_Sociales.csv (basado en lista-sedes-datos.csv)
+            5) Creación de tabla Sedes.csv (basado en lista-sedes-datos.csv)
+            6) Creación de tabla Secciones.csv (basado en lista-secciones.csv)
 
     Ejecución:
-        Ejecutar el script en consola generará las tablas en la carpeta Output/
+        Ejecutar el script en consola generará las tablas en la carpeta Tablas/
 '''
 
 import pandas as pd
@@ -182,6 +186,7 @@ Regiones = Regiones[['id', 'nombre']]
 Regiones.to_csv('Tablas/Regiones.csv', index=False)
 
 
+
 '''
     Etapa 3: Creación de la tabla Paises
 '''
@@ -265,37 +270,88 @@ Paises.to_csv('Tablas/Paises.csv', index=False)
 
 
 '''
-    Etapa 4: Creación de la tabla Sedes
+    Etapa 4: Creación de la tabla Redes Sociales
+'''
+
+# Se extraen del dataset Sedes las redes sociales y el id de la sede a la que se vincula
+SedesRedes = Sedes_DB[['sede_id', 'redes_sociales']]
+
+Redes_Validas = []      # Guardaremos las tuplas (URL, nombre_red, id_sede) para luego cargar en un dataframe
+                        #   Contendrán las redes 'Facebook', 'Twitter', 'Instagram', 'Linkedin', 'Flickr', 'Youtube'
+Redes_Invalidas = []    # Guardaremos los links mal formados o @ ambiguos (IG o Twitter). No los utilizaremos pero lo hacemos por consistencia
+
+# Dado que cada sede puede tener muchas redes sociales separadas por '  //  ', usaremos split() y guardaremos una por una 
+for sede_id, redes in zip(SedesRedes['sede_id'], SedesRedes['redes_sociales']):
+    # Lista con las redes sociales de esa sede (podría ser vacía)
+    redes = str(redes).split('  //  ')
+
+    for url in redes:
+        # Por como son los datos, el split siempre produce un string vacío; si ese es el caso, lo pasamos por alto
+        if(url == ''): continue 
+
+        # Quitamos espacios al inicio y al final de la URL
+        url = url.strip() 
+
+        # Convertimos en minúscula la primera letra para generar mayor consistencia en los datos
+        url = url[0].lower() + url[1:]
+
+        # Si es inválida la descartamos en Redes_Invalidas, de lo contrario la guardamos junto con la compañía en Redes_Validas
+        if(not url or url[0] =='@' or ' ' in url or not '.com' in url):
+            Redes_Invalidas.append((url, 'Unknown', sede_id))
+        else:
+            if('facebook' in url): Redes_Validas.append((url, 'Facebook', sede_id))
+            elif('twitter' in url): Redes_Validas.append((url, 'Twitter', sede_id))
+            elif('instagram' in url): Redes_Validas.append((url, 'Instagram', sede_id))
+            elif('linkedin' in url): Redes_Validas.append((url, 'Linkedin', sede_id))
+            elif('flickr' in url): Redes_Validas.append((url, 'Flickr', sede_id))
+            elif('youtube' in url): Redes_Validas.append((url, 'Youtube', sede_id))
+
+# Usamos Redes_Validas para generar el dataframe
+RedesSociales = pd.DataFrame(Redes_Validas, columns=['URL', 'nombre_red', 'id_sede'])
+
+# Chequeamos que no hay duplicados en la clave primaria { URL }
+Duplicados = RedesSociales[RedesSociales.duplicated(subset=['URL'], keep=False)]
+assert Duplicados.size == 0, "Error: con clave { URL } existen duplicados en la tabla Redes_Sociales"
+
+# Guardamos la tabla en un archivo .csv
+RedesSociales.to_csv('Tablas/Redes_Sociales.csv', index=False)
+
+
+
+'''
+    Etapa 5: Creación de la tabla Sedes
 '''
 
 # Se extraen del dataset "Sedes". Nos quedamos con las columnas que nos interesan y conforman los atributos
 Sedes = Sedes_DB[['sede_id', 'sede_desc_castellano', 'pais_iso_3']]
 
 # Cambiamos los nombres de las columnas
-Sedes = Sedes.rename(columns={'sede_id': 'id', 'pais_iso_3': 'id_pais', 'sede_desc_castellano': 'nombre'})
+Sedes = Sedes.rename(columns={'sede_id': 'id_sede', 'pais_iso_3': 'id_pais', 'sede_desc_castellano': 'nombre'})
 
 # Borramos espacios adicionales
 for Columna in Sedes.columns:
     Sedes[Columna] = Sedes[Columna].str.strip().str.replace(r'\s+', ' ', regex=True)
 
 # Verificamos que no hay nulos en la columna 'id'; los removemos
-Sedes = Sedes.dropna(subset='id')
+Sedes = Sedes.dropna(subset='id_sede')
 
 # Ordenamos alfabéticamente por id
-Sedes = Sedes.sort_values(by='id').reset_index(drop=True)
+Sedes = Sedes.sort_values(by='id_sede').reset_index(drop=True)
 
 # Chequeamos que no hay duplicados en la clave primaria.
-Duplicados = Sedes[Sedes.duplicated(subset=['id', 'nombre'], keep=False)]
-assert Duplicados.size == 0, "Error: con clave { id } existen duplicados en la tabla Pais"
+Duplicados = Sedes[Sedes.duplicated(subset=['id_sede'], keep=False)]
+assert Duplicados.size == 0, "Error: con clave { id_sede } existen duplicados en la tabla Sedes"
+
+# Chequeamos que todos los id_sede de la tabla Redes_Sociales están incluidos en los id_sede de Sedes
+assert set(RedesSociales['id_sede'].to_list()).issubset(Sedes['id_sede'].to_list()), "Error: hay algunos id_sede en Redes_Sociales que no existen en Sedes"
 
 # Guardamos la tabla en un archivo .csv
 Sedes.to_csv('Tablas/Sedes.csv', index=False)
 
 
 
-
 '''
-    Etapa 5: Creación de la tabla Secciones
+    Etapa 6: Creación de la tabla Secciones
 '''
 # Para armar esta tabla utilizamos el dataset "Secciones.csv"
 # Importante: tomamos la decisión de que la clave primaria sea { id_sede, nombre } aunque haya habido tres casos particulares en los que
@@ -326,5 +382,3 @@ assert Duplicados.size == 0, "Error: con clave { id } existen duplicados en la t
 
 # Guardamos la tabla en un archivo .csv
 Secciones.to_csv('Tablas/Secciones.csv', index=False)
-
-
