@@ -31,6 +31,8 @@ Importar bibliotecas y cargar tablas.
 import pandas as pd
 import sqlite3
 import matplotlib.pyplot as plt
+import matplotlib.ticker as ticker
+import seaborn as sns
 
 # Importamos los datasets que vamos a utilizar en este programa.
 Migrantes = pd.read_csv("Tablas/Migrantes.csv")
@@ -113,12 +115,97 @@ plt.savefig('Graficos/Punto i.png')
 #plt.show()
 
 
-
 '''
 Punto ii.
 
 '''
 
+# Recolectamos países que tienen sedes.
+Paises_Con_Sedes = list(Sedes['id_pais'].unique())
+
+# Filtramos df Migrantes con los países que tienen sedes.
+Migrantes_Con_Sedes = Migrantes[Migrantes['id_pais'].isin(Paises_Con_Sedes)]
+
+# Creamos la columna "Flujo Neto".
+Migrantes_Con_Sedes.loc[:, 'Flujo_Neto'] = Migrantes_Con_Sedes.loc[:, 'inmigrantes'] - Migrantes_Con_Sedes.loc[:, 'emigrantes']
+
+# Vinculamos la tabla con Paises y Regiones para hallar las Regiones.
+Migrantes_Con_Sedes = Migrantes_Con_Sedes.merge(Paises, how='left', left_on='id_pais', right_on='id')
+Migrantes_Con_Sedes = Migrantes_Con_Sedes.merge(Regiones, how='left', left_on='id_region', right_on='id')
+
+# Filtramos columnas.
+Migrantes_Con_Sedes = Migrantes_Con_Sedes[['nombre_y', 'id_pais', 'anio', 'Flujo_Neto']]
+
+# Cambiamos los nombres de las columnas.
+Migrantes_Con_Sedes.rename(columns={'nombre_y': 'region'}, inplace=True)
+
+# Damos formato a los nombres de las regiones para que se vean bien en el gráfico.
+Migrantes_Con_Sedes['region'] = Migrantes_Con_Sedes['region'].apply(lambda x: x.title())
+Migrantes_Con_Sedes['region'] = Migrantes_Con_Sedes['region'].apply(lambda x: x.replace(' Y ', ' y ') if ' Y ' in x else x)
+Migrantes_Con_Sedes['region'] = Migrantes_Con_Sedes['region'].apply(lambda x: x.replace(' Del ', ' del ') if ' Del ' in x else x)
+
+# Función para eliminar outliers de un dataframe basándose en una columna.
+def Eliminar_Outliers(df: pd.DataFrame, Columna: str) -> pd.DataFrame:
+
+    # Calcular Q1 y Q3.
+    Q1 = df[Columna].quantile(0.25)
+    Q3 = df[Columna].quantile(0.75)
+    IQR = Q3 - Q1  # Rango intercuartil.
+
+    # Definir los límites para los outliers.
+    Limite_Inferior = Q1 - 1.5 * IQR
+    Limite_Superior = Q3 + 1.5 * IQR
+
+    # Filtrar dataframe.
+    df = df[(df[Columna] >= Limite_Inferior) & (df[Columna] <= Limite_Superior)]
+
+    return df
+
+# Filtrar outliers de flujo neto en Migrantes_Con_Sedes.
+Migrantes_Con_Sedes = Eliminar_Outliers(Migrantes_Con_Sedes, 'Flujo_Neto')
+
+# Definimos listas para separar los boxplots.
+Regiones_Con_Mas_Flujo = ['América del Sur', 'Europa Occidental', 'América del Norte', 'Europa Central y Oriental']
+Regiones_Con_Menor_Flujo = [Region for Region in Migrantes_Con_Sedes['region'].unique() if Region not in Regiones_Con_Mas_Flujo]
+
+# Crear DataFrames separados.
+df_Regiones_Con_Mas_Flujo = Migrantes_Con_Sedes[Migrantes_Con_Sedes['region'].isin(Regiones_Con_Mas_Flujo)]
+df_Regiones_Con_Menor_Flujo = Migrantes_Con_Sedes[Migrantes_Con_Sedes['region'].isin(Regiones_Con_Menor_Flujo)]
+
+# Eliminamos outliers nuevamente en las de menor flujo para un mejor visionado.
+df_Regiones_Con_Menor_Flujo = Eliminar_Outliers(df_Regiones_Con_Menor_Flujo, 'Flujo_Neto')
+
+# Obtener las medianas para ordenar las regiones en el gráfico.
+Medianas_Mayor_Flujo = df_Regiones_Con_Mas_Flujo.groupby('region')['Flujo_Neto'].median().sort_values().index.tolist()
+Medianas_Menor_Flujo = df_Regiones_Con_Menor_Flujo.groupby('region')['Flujo_Neto'].median().sort_values().index.tolist()
+
+# Creamos los gráficos: dos paneles.
+Figure, Graficos = plt.subplots(nrows=1, ncols=2, figsize=(20, 10))
+
+# Primer boxplot.
+sns.boxplot(x='region', y='Flujo_Neto', data=df_Regiones_Con_Mas_Flujo, ax=Graficos[0], order=Medianas_Mayor_Flujo, palette='Set2')
+Graficos[0].set_xlabel('Region', labelpad = 90)
+Graficos[0].set_ylabel('Flujo migratorio neto')
+Graficos[0].set_xticklabels(Graficos[0].get_xticklabels(), rotation=90, ha='right')  # Rotate x-axis labels
+Graficos[0].grid(False) # Eliminar la cuadrícula
+Graficos[0].yaxis.set_major_formatter(ticker.FuncFormatter(lambda x, _: f'{int(x):,}'.replace(",", ".") ))
+
+# Segundo boxplot.
+sns.boxplot(x='region', y='Flujo_Neto', data=df_Regiones_Con_Menor_Flujo, ax=Graficos[1], order=Medianas_Menor_Flujo, palette='Set1')
+Graficos[1].set_xlabel('Region', labelpad = 50)
+Graficos[1].set_ylabel('Flujo migratorio neto')
+Graficos[1].set_xticklabels(Graficos[1].get_xticklabels(), rotation=90, ha='right')  # Rotate x-axis labels
+Graficos[1].grid(False)  # Eliminar la cuadrícula
+Graficos[1].yaxis.set_major_formatter(ticker.FuncFormatter(lambda x, _: f'{int(x):,}'.replace(",", ".") ))
+
+# Ajustar los márgenes para evitar que las etiquetas se corten.
+plt.tight_layout()
+
+# Guardar gráficos.
+plt.savefig('Graficos/Punto ii.png')
+
+# Show the plots
+#plt.show()
 
 
 '''
@@ -166,6 +253,9 @@ Graphic_1.plot(x, Trendline, color='red', linestyle='--', label=f'R² = {R_value
 # Etiquetas y título.
 Graphic_1.set_ylabel('Inmigrantes', fontsize='medium', labelpad=15)
 Graphic_1.set_xlabel('Cantidad de sedes', fontsize='medium', labelpad=15)
+
+# Agregar separador de miles al eje Y.
+Graphic_1.yaxis.set_major_formatter(ticker.FuncFormatter(lambda x, _: f'{int(x):,}'.replace(",", ".") ))
 
 # Ajustar el diseño para evitar recortes.
 plt.tight_layout()
