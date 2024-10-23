@@ -152,7 +152,7 @@ Migrantes_Con_Sedes['region'] = Migrantes_Con_Sedes['region'].apply(lambda x: x.
 Migrantes_Con_Sedes['region'] = Migrantes_Con_Sedes['region'].apply(lambda x: x.replace(' Y ', ' y ') if ' Y ' in x else x)
 Migrantes_Con_Sedes['region'] = Migrantes_Con_Sedes['region'].apply(lambda x: x.replace(' Del ', ' del ') if ' Del ' in x else x)
 
-# Eliminar datos que joden.
+# Remover datos que molestan.
 Migrantes_Con_Sedes = Migrantes_Con_Sedes[Migrantes_Con_Sedes['id_pais'] != 'ITA']
 Migrantes_Con_Sedes = Migrantes_Con_Sedes[Migrantes_Con_Sedes['id_pais'] != 'ESP']
 
