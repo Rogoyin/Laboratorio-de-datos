@@ -1,4 +1,9 @@
 '''
+    Autores:
+    - Alvarez, Matías
+    - Dumas, Román
+    - Nogueroles, Patricio
+
     Script para la generación automática de tablas descritas en nuestro modelo basado en los datasets de migraciones, sedes y secciones.
     
     Prerrequisitos:

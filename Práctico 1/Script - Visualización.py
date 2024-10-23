@@ -1,4 +1,9 @@
 '''
+    Autores:
+    - Alvarez, Matías
+    - Dumas, Román
+    - Nogueroles, Patricio
+
     Script para la generación de gráficos.
     
     Prerrequisitos:
