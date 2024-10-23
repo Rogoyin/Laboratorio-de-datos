@@ -129,12 +129,15 @@ Migrantes_Con_Sedes = Migrantes[Migrantes['id_pais'].isin(Paises_Con_Sedes)]
 # Creamos la columna "Flujo Neto".
 Migrantes_Con_Sedes.loc[:, 'Flujo_Neto'] = Migrantes_Con_Sedes.loc[:, 'inmigrantes'] - Migrantes_Con_Sedes.loc[:, 'emigrantes']
 
+# Agrupar por país y calcular el promedio del flujo neto en los distintos años.
+Migrantes_Con_Sedes = Migrantes_Con_Sedes.groupby('id_pais', as_index=False)['Flujo_Neto'].mean()
+
 # Vinculamos la tabla con Paises y Regiones para hallar las Regiones.
 Migrantes_Con_Sedes = Migrantes_Con_Sedes.merge(Paises, how='left', left_on='id_pais', right_on='id')
 Migrantes_Con_Sedes = Migrantes_Con_Sedes.merge(Regiones, how='left', left_on='id_region', right_on='id')
 
 # Filtramos columnas.
-Migrantes_Con_Sedes = Migrantes_Con_Sedes[['nombre_y', 'id_pais', 'anio', 'Flujo_Neto']]
+Migrantes_Con_Sedes = Migrantes_Con_Sedes[['nombre_y', 'id_pais', 'Flujo_Neto']]
 
 # Cambiamos los nombres de las columnas.
 Migrantes_Con_Sedes.rename(columns={'nombre_y': 'region'}, inplace=True)
@@ -143,6 +146,10 @@ Migrantes_Con_Sedes.rename(columns={'nombre_y': 'region'}, inplace=True)
 Migrantes_Con_Sedes['region'] = Migrantes_Con_Sedes['region'].apply(lambda x: x.title())
 Migrantes_Con_Sedes['region'] = Migrantes_Con_Sedes['region'].apply(lambda x: x.replace(' Y ', ' y ') if ' Y ' in x else x)
 Migrantes_Con_Sedes['region'] = Migrantes_Con_Sedes['region'].apply(lambda x: x.replace(' Del ', ' del ') if ' Del ' in x else x)
+
+# Eliminar datos que joden.
+Migrantes_Con_Sedes = Migrantes_Con_Sedes[Migrantes_Con_Sedes['id_pais'] != 'ITA']
+Migrantes_Con_Sedes = Migrantes_Con_Sedes[Migrantes_Con_Sedes['id_pais'] != 'ESP']
 
 # Función para eliminar outliers de un dataframe basándose en una columna.
 def Eliminar_Outliers(df: pd.DataFrame, Columna: str) -> pd.DataFrame:
@@ -161,11 +168,8 @@ def Eliminar_Outliers(df: pd.DataFrame, Columna: str) -> pd.DataFrame:
 
     return df
 
-# Filtrar outliers de flujo neto en Migrantes_Con_Sedes.
-Migrantes_Con_Sedes = Eliminar_Outliers(Migrantes_Con_Sedes, 'Flujo_Neto')
-
 # Definimos listas para separar los boxplots.
-Regiones_Con_Mas_Flujo = ['América del Sur', 'Europa Occidental', 'América del Norte', 'Europa Central y Oriental']
+Regiones_Con_Mas_Flujo = ['América del Sur', 'América del Norte']
 Regiones_Con_Menor_Flujo = [Region for Region in Migrantes_Con_Sedes['region'].unique() if Region not in Regiones_Con_Mas_Flujo]
 
 # Crear DataFrames separados.
