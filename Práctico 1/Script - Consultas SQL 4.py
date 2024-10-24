@@ -1,125 +1,122 @@
+# Carga de bibliotecas.
+
 import pandas as pd
 from inline_sql import sql, sql_val
 from pandasql import sqldf
 
-sedes_basico = pd.read_csv('Materiales/lista-sedes.csv')
-sedes_completo = pd.read_csv('lista-sedes-datos.csv')
-sedes_secciones = pd.read_csv('lista-secciones.csv')
-migracionesDF = pd.read_csv('datos_migraciones.csv')
+# Carga de datasets necesarios.
 
+Sedes = pd.read_csv('Tablas/Sedes.csv')
+Secciones = pd.read_csv('Tablas/Secciones.csv')
+Migrantes = pd.read_csv('Tablas/Migrantes.csv')
+Redes_Sociales_DB = pd.read_csv('Tablas/Redes_Sociales.csv')
 
-sedes_completo[['sede_id', 'redes_sociales']]
+#Sedes[['id_sede', 'redes_sociales']]
 
-#Nuevo
-redes_FB = []
-redes_TW = []
-redes_IG = [] #pueden aparecer solo con un "@"
-redes_YT = []
-redes_LI = [] #linkedin...
-redes_FR = [] #... Flickr.....
-redes_Invalidas = [] #link mal formado o @ ambiguo (IG o Twitter)
-redes_NULL = [] #sede sin link
+Redes_FB = [] # Facebook.
+Redes_TW = [] # Twitter.
+Redes_IG = [] # Instragram.
+Redes_YT = [] # YouTube.
+Redes_LI = [] # Linkedin.
+Redes_FR = [] # Flickr.
+Redes_Invalidas = [] # Links mal formados o @ ambiguos (Instagram o Twitter).
+Redes_NULL = [] # Sede sin link.
 
-redes_totales = []
+Redes_Totales = [] # Redes totales.
 
-for sede_id, redes in zip(sedes_completo['sede_id'], sedes_completo['redes_sociales']):
-  print(redes)
-  redes = str(redes).split('  //  ') #lista con las redes sociales de esa sede (puede ser vacía)
+for Sede_Id, URL in zip(Redes_Sociales_DB['id_sede'], Redes_Sociales_DB['URL']):
+    URL_Lista = str(URL).split('  //  ') # Lista con las redes sociales de esa sede (puede estar vacía).
 
-  for red in redes:
+    for URL in URL_Lista:
 
-    if(red == ''): continue #por el formato, si hay links el strip me introduce un dato extra que siempre es el string vacío. lo quito acá
+        # Por el formato, si hay links el strip introduce un dato extra que siempre es el string vacío. Con esto, lo eliminamos.
+        if(URL == ''): continue 
 
-    red = red.strip() #quito espacios al inicio y al final
-    red = red[0].lower() + red[1:] #Que empiece siempre en minus para mas consistencia (hay datos que se escapaban a esto y se filtraban mal)
+        URL = URL.strip() # Quitar espacios al inicio y al final.
+        URL = URL.lower() # Que empiece siempre en minúscula para mayor consistencia (hay datos que se escapaban a esto y se filtraban mal).
+        
+        if(URL == 'nan'):
+            Redes_NULL.append(Sede_Id)   # Sedes sin redes.
+            continue
+        else: 
+            Redes_Totales.append((Sede_Id, URL))  # Sedes con redes.
 
-    if(red == 'nan'):
-      redes_NULL.append(sede_id)
-      continue
-    else: redes_totales.append((sede_id,red))
+        # Clasificar redes en distintas listas.
+        if(URL[0] =='@' or ' ' in URL or ".com" not in URL): 
+            Redes_Invalidas.append((Sede_Id, URL))
+        elif 'facebook' in URL: 
+            Redes_FB.append((Sede_Id, URL))
+        elif('twitter' in URL): 
+            Redes_TW.append((Sede_Id, URL))
+        elif('instagram' in URL): 
+            Redes_IG.append((Sede_Id, URL))
+        elif('linkedin' in URL): 
+            Redes_LI.append((Sede_Id, URL))
+        elif('flickr' in URL): 
+            Redes_FR.append((Sede_Id, URL))
+        elif('youtube' in URL): 
+            Redes_YT.append((Sede_Id, URL))
 
-    if(red[0] =='@' or ' ' in red or not '.com' in red): redes_Invalidas.append((sede_id, red))
-    elif('facebook' in red): redes_FB.append( (sede_id, red))
-    elif('twitter' in red): redes_TW.append((sede_id, red) )
-    elif('instagram' in red): redes_IG.append((sede_id, red) )
-    elif('linkedin' in red): redes_LI.append((sede_id, red) )
-    elif('flickr' in red): redes_FR.append((sede_id, red) )
-    elif('youtube' in red): redes_YT.append((sede_id, red) )
+# Redes a almacenar.
+Redes_Validas = Redes_FB + Redes_TW + Redes_IG + Redes_LI + Redes_FR + Redes_YT
 
-redes_validas = redes_FB+ redes_TW + redes_IG + redes_LI + redes_FR + redes_YT
+# Redes que no se usan.
+Redes_Descartadas = set(Redes_Totales).difference(set(Redes_FB)).difference(set(Redes_IG)).difference(set(Redes_LI)).difference(set(Redes_FR)).difference(set(Redes_YT)).difference(set(Redes_TW)).difference(set(Redes_Invalidas))
 
-redes_descartadas = set(redes_totales).difference(set(redes_FB)).difference(set(redes_IG)).difference(set(redes_LI)).difference(set(redes_FR)).difference(set(redes_YT)).difference(set(redes_TW)).difference(set(redes_Invalidas))
+# Creación de listas de almacenamiento.
+Sede_IDs = []
+Redes_Sociales = []
+URLs = []
 
-#Creo un diccionario de sede_id a red social. Notar que puede ser multivaluado por las varias cuentas de IG de una sola sede
+# Creación de diccionario vacío.
+Dic_Redes = {'id_sede': Sede_IDs, 'red_social': Redes_Sociales, 'url': URLs}
 
-#Esto lo podía hacer directo en el ciclo de arriba y no dar tantas vueltas como estoy haciendo
-#pero quería controlar que esté leyendo bien los datos de la tabla y lo de arriba era más directo para verificar eso
+# Relleno del diccionario con el id_sede, red_social y url.
+for Sede_Id, Url in Redes_FB:
+    Dic_Redes['id_sede'].append(Sede_Id)
+    Dic_Redes['red_social'].append('facebook')
+    Dic_Redes['url'].append(Url)
 
-#sede_id, Red, URL
-sede_ids = []
-redess = []
-URLS = []
+for Sede_Id, Url in Redes_TW:
+    Dic_Redes['id_sede'].append(Sede_Id)
+    Dic_Redes['red_social'].append('twitter')
+    Dic_Redes['url'].append(Url)
 
-dic_redes = {'sede_id': sede_ids, 'Red Social': redess, 'URL': URLS}
+for Sede_Id, Url in Redes_IG:
+    Dic_Redes['id_sede'].append(Sede_Id)
+    Dic_Redes['red_social'].append('instagram')
+    Dic_Redes['url'].append(Url)
 
-for sede_id, url in redes_FB:
-  dic_redes['sede_id'].append(sede_id)
-  dic_redes['Red Social'].append('Facebook')
-  dic_redes['URL'].append(url)
+for Sede_Id, Url in Redes_YT:
+    Dic_Redes['id_sede'].append(Sede_Id)
+    Dic_Redes['red_social'].append('youtube')
+    Dic_Redes['url'].append(Url)
 
-for sede_id, url in redes_TW:
-  dic_redes['sede_id'].append(sede_id)
-  dic_redes['Red Social'].append('Twitter')
-  dic_redes['URL'].append(url)
+for Sede_Id, Url in Redes_FR:
+    Dic_Redes['id_sede'].append(Sede_Id)
+    Dic_Redes['red_social'].append('flickr')
+    Dic_Redes['url'].append(Url)
 
-for sede_id, url in redes_IG:
-  dic_redes['sede_id'].append(sede_id)
-  dic_redes['Red Social'].append('Instagram')
-  dic_redes['URL'].append(url)
+for Sede_Id, Url in Redes_LI:
+    Dic_Redes['id_sede'].append(Sede_Id)
+    Dic_Redes['red_social'].append('linkedin')
+    Dic_Redes['url'].append(Url)
 
-for sede_id, url in redes_YT:
-  dic_redes['sede_id'].append(sede_id)
-  dic_redes['Red Social'].append('Youtube')
-  dic_redes['URL'].append(url)
+# Formar df con el diccionario.
+Redes_DF = pd.DataFrame(Dic_Redes)
 
-for sede_id, url in redes_FR:
-  dic_redes['sede_id'].append(sede_id)
-  dic_redes['Red Social'].append('Flickr')
-  dic_redes['URL'].append(url)
-
-for sede_id, url in redes_LI:
-  dic_redes['sede_id'].append(sede_id)
-  dic_redes['Red Social'].append('Linkedin')
-  dic_redes['URL'].append(url)
-
-Redes_DF = pd.DataFrame(dic_redes)
-Redes_DF
-
-#Si tuviera atributos multivaluados, este comando me los separa en entradas nuevas por cada valor
-#Redes_DF.explode('URL')
-
-sedes_basico.sample(2)
-
-#A la tabla de arriba, le hacemos un JOIN con la tabla de paises, para conseguir la columna en el formato que nos piden
-
-#La tabla "sedes_basico" tiene el nombre de cada id de pais
-
-#Ordenar de manera ascendente por nombre de país, sede, tipo de red y
-#finalmente por url. Ejemplo:
-
-
-
-query =  '''
-          SELECT s.pais_castellano AS País,
-                 r.sede_id AS Sede,
-                 r."Red Social",
-                 r.URL
-                 FROM Redes_DF AS r
-
-          INNER JOIN sedes_basico AS s
-          ON s.sede_id = r.sede_id
-
-          ORDER BY País ASC, Sede ASC, "Red Social" ASC, URL ASC
+# Consulta SQL.
+Query =  '''
+          SELECT s.nombre AS pais,
+                 r.id_sede AS sede,
+                 r."red_social",
+                 r.url
+          FROM Redes_DF AS r
+          INNER JOIN Sedes AS s ON s.id_sede = r.id_sede
+          ORDER BY pais ASC, sede ASC, "red_social" ASC, url ASC
 '''
-out = sqldf(query)
-out.to_csv('Redes Sociales - Ejercicio h.iv')
+
+Tabla = sqldf(Query)
+
+# Guardar archivo.
+Tabla.to_csv('Tablas/h.iv.csv')
