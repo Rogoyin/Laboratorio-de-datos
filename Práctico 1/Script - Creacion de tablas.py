@@ -257,17 +257,17 @@ Paises = pd.merge(Paises, Regiones, left_on='region_geografica', right_on='nombr
 
 # Filtramos las columnas a las que necesitamos y cambiamos nombres
 Paises = Paises[['id_x', 'nombre_x', 'id_y']]
-Paises = Paises.rename(columns={'id_x': 'id', 'nombre_x': 'nombre', 'id_y': 'id_region'})
+Paises = Paises.rename(columns={'id_x': 'codigo_iso', 'nombre_x': 'nombre', 'id_y': 'id_region'})
 
 # Verificamos que no hay nulos en la columna 'id'; los removemos
-Paises = Paises.dropna(subset='id')
+Paises = Paises.dropna(subset='codigo_iso')
 
 # Ordenamos alfabéticamente por id
-Paises = Paises.sort_values(by='id').reset_index(drop=True)
+Paises = Paises.sort_values(by='codigo_iso').reset_index(drop=True)
 
 # Chequeamos que no hay duplicados en la clave primaria.
-Duplicados = Paises[Paises.duplicated(subset=['id'], keep=False)]
-assert Duplicados.size == 0, "Error: con clave { id } existen duplicados en la tabla Pais"
+Duplicados = Paises[Paises.duplicated(subset=['codigo_iso'], keep=False)]
+assert Duplicados.size == 0, "Error: con clave { codigo_iso } existen duplicados en la tabla Pais"
 
 # Guardamos la tabla en un archivo .csv
 Paises.to_csv('Tablas/Paises.csv', index=False)
