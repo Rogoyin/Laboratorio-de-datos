@@ -331,7 +331,7 @@ RedesSociales.to_csv('Tablas/Redes_Sociales.csv', index=False)
 Sedes = Sedes_DB[['sede_id', 'sede_desc_castellano', 'pais_iso_3']]
 
 # Cambiamos los nombres de las columnas
-Sedes = Sedes.rename(columns={'sede_id': 'id_sede', 'pais_iso_3': 'id_pais', 'sede_desc_castellano': 'nombre'})
+Sedes = Sedes.rename(columns={'sede_id': 'id_sede', 'pais_iso_3': 'codigo_iso_pais', 'sede_desc_castellano': 'nombre'})
 
 # Borramos espacios adicionales
 for Columna in Sedes.columns:
