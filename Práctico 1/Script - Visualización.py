@@ -194,7 +194,7 @@ Figure, Graficos = plt.subplots(nrows=1, ncols=2, figsize=(20, 10))
 # Primer boxplot.
 sns.boxplot(x='region', y='Flujo_Neto', data=df_Regiones_Con_Mas_Flujo, ax=Graficos[0], order=Medianas_Mayor_Flujo, palette='Set2')
 Graficos[0].set_xlabel('Region', labelpad = 90)
-Graficos[0].set_ylabel('Flujo migratorio neto')
+Graficos[0].set_ylabel('Promedio de flujo migratorio neto')
 Graficos[0].set_xticklabels(Graficos[0].get_xticklabels(), rotation=90, ha='right')  # Rotate x-axis labels
 Graficos[0].grid(False) # Eliminar la cuadrícula
 Graficos[0].yaxis.set_major_formatter(ticker.FuncFormatter(lambda x, _: f'{int(x):,}'.replace(",", ".") ))
@@ -202,7 +202,7 @@ Graficos[0].yaxis.set_major_formatter(ticker.FuncFormatter(lambda x, _: f'{int(x
 # Segundo boxplot.
 sns.boxplot(x='region', y='Flujo_Neto', data=df_Regiones_Con_Menor_Flujo, ax=Graficos[1], order=Medianas_Menor_Flujo, palette='Set1')
 Graficos[1].set_xlabel('Region', labelpad = 50)
-Graficos[1].set_ylabel('Flujo migratorio neto')
+Graficos[1].set_ylabel('Promedio de flujo migratorio neto')
 Graficos[1].set_xticklabels(Graficos[1].get_xticklabels(), rotation=90, ha='right')  # Rotate x-axis labels
 Graficos[1].grid(False)  # Eliminar la cuadrícula
 Graficos[1].yaxis.set_major_formatter(ticker.FuncFormatter(lambda x, _: f'{int(x):,}'.replace(",", ".") ))
