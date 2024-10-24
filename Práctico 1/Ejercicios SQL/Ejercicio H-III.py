@@ -8,7 +8,7 @@
         Confeccionar un reporte con la información de para cada país y la cantidad de tipos de redes distintas utilizadas.
 
         Prerrequisitos:
-            - Haber ejecutado el script 'Ejercicio H.IV.py' y contar con las tablas resultantes en /Reportes/
+            - Haber ejecutado el script 'Ejercicio H.IV.py' y contar con las tablas resultantes en ./Reportes/
             - Contar con las biliotecas necesarias
     
         Ejecución:
@@ -18,7 +18,7 @@
 # Carga de bibliotecas.
 
 import pandas as pd
-from inline_sql import sql, sql_val
+#from inline_sql import sql, sql_val
 from pandasql import sqldf
 
 # Carga de datasets necesarios.
@@ -53,4 +53,4 @@ Query =  '''
 H_IV2 = sqldf(Query)
 
 # Guardar archivo.
-H_IV2.to_csv('Reportes/Ejercicio H-III.csv')
+H_IV2.to_csv('Reportes/Ejercicio H-III.csv', index=False)

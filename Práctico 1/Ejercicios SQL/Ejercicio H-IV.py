@@ -140,4 +140,4 @@ Query =  '''
 Tabla = sqldf(Query)
 
 # Guardar archivo.
-Tabla.to_csv('Reportes/Ejercicio H-IV.csv')
+Tabla.to_csv('Reportes/Ejercicio H-IV.csv', index=False)
