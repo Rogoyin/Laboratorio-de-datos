@@ -68,7 +68,7 @@ Consulta_SQL = """
                SELECT R.nombre AS region,
                       COUNT(S.id_sede) AS cantidad_sedes
                FROM Paises AS P
-               INNER JOIN Sedes AS S ON P.id = S.id_pais
+               INNER JOIN Sedes AS S ON P.codigo_iso = S.codigo_iso_pais
                LEFT JOIN (
                             SELECT SC.id_sede, COUNT(SC.id_sede) AS cant_secciones
                             FROM Secciones AS SC
@@ -126,7 +126,7 @@ Punto ii.
 '''
 
 # Recolectamos países que tienen sedes.
-Paises_Con_Sedes = list(Sedes['id_pais'].unique())
+Paises_Con_Sedes = list(Sedes['codigo_iso_pais'].unique())
 
 # Filtramos df Migrantes con los países que tienen sedes.
 Migrantes_Con_Sedes = Migrantes[Migrantes['id_pais'].isin(Paises_Con_Sedes)]
@@ -138,7 +138,7 @@ Migrantes_Con_Sedes.loc[:, 'Flujo_Neto'] = Migrantes_Con_Sedes.loc[:, 'inmigrant
 Migrantes_Con_Sedes = Migrantes_Con_Sedes.groupby('id_pais', as_index=False)['Flujo_Neto'].mean()
 
 # Vinculamos la tabla con Paises y Regiones para hallar las Regiones.
-Migrantes_Con_Sedes = Migrantes_Con_Sedes.merge(Paises, how='left', left_on='id_pais', right_on='id')
+Migrantes_Con_Sedes = Migrantes_Con_Sedes.merge(Paises, how='left', left_on='id_pais', right_on='codigo_iso')
 Migrantes_Con_Sedes = Migrantes_Con_Sedes.merge(Regiones, how='left', left_on='id_region', right_on='id')
 
 # Filtramos columnas.
@@ -225,8 +225,8 @@ Punto iii.
 Consulta_SQL = """
                SELECT M.id_pais, M.inmigrantes, COUNT(S.id_sede) AS cantidad_sedes
                FROM Migrantes AS M
-               LEFT JOIN Paises AS P ON M.id_pais = P.id
-               INNER JOIN Sedes AS S ON M.id_pais = S.id_pais
+               LEFT JOIN Paises AS P ON M.id_pais = P.codigo_iso
+               INNER JOIN Sedes AS S ON M.id_pais = S.codigo_iso_pais
                WHERE anio = 2000
                GROUP BY M.id_pais
                ORDER BY M.inmigrantes DESC
