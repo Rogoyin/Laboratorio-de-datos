@@ -28,6 +28,7 @@ Sedes = pd.read_csv('../Tablas/Sedes.csv')
 Secciones = pd.read_csv('../Tablas/Secciones.csv')
 Migrantes = pd.read_csv('../Tablas/Migrantes.csv')
 Redes_Sociales_DB = pd.read_csv('../Tablas/Redes_Sociales.csv')
+Paises = pd.read_csv('../Tablas/Paises.csv')
 
 #Sedes[['id_sede', 'redes_sociales']]
 
@@ -125,13 +126,15 @@ Redes_DF = pd.DataFrame(Dic_Redes)
 
 # Consulta SQL.
 Query =  '''
-          SELECT s.nombre AS pais,
+          SELECT p.nombre AS pais,
                  r.id_sede AS sede,
                  r."red_social",
                  r.url
           FROM Redes_DF AS r
           INNER JOIN Sedes AS s ON s.id_sede = r.id_sede
+          LEFT JOIN Paises AS p ON s.codigo_iso_pais = p.codigo_iso
           ORDER BY pais ASC, sede ASC, "red_social" ASC, url ASC
+
 '''
 
 Tabla = sqldf(Query)
