@@ -162,6 +162,7 @@ Migrantes_.to_csv('Tablas/Migrantes.csv', index=False)
 
 '''
     Etapa 2: Creación de la tabla Regiones
+    
 '''
 
 # Las regiones se extraen del Dataset_Sedes
