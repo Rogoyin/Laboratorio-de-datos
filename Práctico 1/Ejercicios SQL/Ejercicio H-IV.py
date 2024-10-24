@@ -1,15 +1,33 @@
+'''
+    Autores:
+        - Alvarez, Matías
+        - Dumas, Román
+        - Nogueroles, Patricio
+    
+    Ejercicio H.IV:
+        Confeccionar un reporte con la información de redes sociales, donde se indique para cada caso: el país, la sede, el tipo de red social y url utilizada.
+        Ordenar de manera ascendente por nombre de país, sede, tipo de red y finalmente por url.
+
+        Prerrequisitos:
+            - Haber ejecutado el script 'Script - Creacion de tablas.py' y contar con las tablas resultantes en ./Tablas/
+            - Contar con las biliotecas necesarias
+    
+        Ejecución:
+            Ejecutar el script generará el reporte 'Ejercicio H-IV.csv' en la carpeta ./Reportes/
+'''
+
 # Carga de bibliotecas.
 
 import pandas as pd
-from inline_sql import sql, sql_val
+# from inline_sql import sql, sql_val
 from pandasql import sqldf
 
 # Carga de datasets necesarios.
 
-Sedes = pd.read_csv('Tablas/Sedes.csv')
-Secciones = pd.read_csv('Tablas/Secciones.csv')
-Migrantes = pd.read_csv('Tablas/Migrantes.csv')
-Redes_Sociales_DB = pd.read_csv('Tablas/Redes_Sociales.csv')
+Sedes = pd.read_csv('../Tablas/Sedes.csv')
+Secciones = pd.read_csv('../Tablas/Secciones.csv')
+Migrantes = pd.read_csv('../Tablas/Migrantes.csv')
+Redes_Sociales_DB = pd.read_csv('../Tablas/Redes_Sociales.csv')
 
 #Sedes[['id_sede', 'redes_sociales']]
 
@@ -119,4 +137,4 @@ Query =  '''
 Tabla = sqldf(Query)
 
 # Guardar archivo.
-Tabla.to_csv('Tablas/h.iv.csv')
+Tabla.to_csv('Reportes/Ejercicio H-IV.csv')
