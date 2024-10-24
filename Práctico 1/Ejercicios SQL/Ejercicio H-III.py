@@ -27,7 +27,7 @@ Sedes = pd.read_csv('../Tablas/Sedes.csv')
 Secciones = pd.read_csv('../Tablas/Secciones.csv')
 Migrantes = pd.read_csv('../Tablas/Migrantes.csv')
 Redes_Sociales_DB = pd.read_csv('../Tablas/Redes_Sociales.csv')
-H_IV = pd.read_csv('../Tablas/h.iv.csv')
+H_IV = pd.read_csv('Reportes/Ejercicio H-IV.csv')
 
 # Consulta a la tabla resultante del punto h.iv.
 # Con esto se forma una nueva tabla con el pais y la red social.
