@@ -1,0 +1,233 @@
+codigo_iso,nombre,id_region
+ABW,Aruba,
+AFG,Afghanistan,
+AGO,Angola,9.0
+AIA,Anguilla,
+ALB,Albania,
+AND,Andorra,
+ANT,Netherlands Antilles,
+ARE,United Arab Emirates,4.0
+ARG,Argentina,3.0
+ARM,Armenia,4.0
+ASM,American Samoa,
+ATG,Antigua and Barbuda,
+AUS,Australia,7.0
+AUT,Austria,6.0
+AZE,Azerbaijan,4.0
+BDI,Burundi,
+BEL,Belgium,6.0
+BEN,Benin,
+BFA,Burkina Faso,
+BGD,Bangladesh,4.0
+BGR,Bulgaria,5.0
+BHR,Bahrain,
+BHS,"Bahamas, The",
+BIH,Bosnia and Herzegovina,
+BLR,Belarus,
+BLZ,Belize,
+BMU,Bermuda,
+BOL,Bolivia,3.0
+BRA,Brazil,3.0
+BRB,Barbados,1.0
+BRN,Brunei Darussalam,
+BTN,Bhutan,
+BWA,Botswana,
+CAF,Central African Republic,
+CAN,Canada,2.0
+CHE,Switzerland,6.0
+CHI,Channel Islands,
+CHL,Chile,3.0
+CHN,China,4.0
+CIV,Cote d'Ivoire,
+CMR,Cameroon,
+COD,"Congo, Dem. Rep.",
+COG,"Congo, Rep.",
+COK,Cook Islands,
+COL,Colombia,3.0
+COM,Comoros,
+CPV,Cape Verde,
+CRI,Costa Rica,1.0
+CUB,Cuba,1.0
+CYM,Cayman Islands,
+CYP,Cyprus,
+CZE,Czech Republic,5.0
+DEU,Germany,6.0
+DJI,Djibouti,
+DMA,Dominica,
+DNK,Denmark,6.0
+DOM,Dominican Republic,1.0
+DZA,Algeria,8.0
+ECU,Ecuador,3.0
+EGY,"Egypt, Arab Rep.",8.0
+ERI,Eritrea,
+ESP,Spain,6.0
+EST,Estonia,
+ETH,Ethiopia,9.0
+FIN,Finland,6.0
+FJI,Fiji,
+FLK,Falkland Islands (Malvinas),
+FRA,France,6.0
+FRO,Faeroe Islands,
+FSM,"Micronesia, Fed. Sts.",
+GAB,Gabon,
+GBR,United Kingdom,6.0
+GEO,Georgia,
+GHA,Ghana,
+GIB,Gibraltar,
+GIN,Guinea,
+GLP,Guadeloupe,
+GMB,"Gambia, The",
+GNB,Guinea-Bissau,
+GNQ,Equatorial Guinea,
+GRC,Greece,6.0
+GRD,Grenada,
+GRL,Greenland,
+GTM,Guatemala,1.0
+GUF,French Guiana,
+GUM,Guam,
+GUY,Guyana,1.0
+HKG,"Hong Kong SAR, China",
+HND,Honduras,1.0
+HRV,Croatia,
+HTI,Haiti,1.0
+HUN,Hungary,5.0
+IDN,Indonesia,4.0
+IMN,Isle of Man,
+IND,India,4.0
+IRL,Ireland,6.0
+IRN,"Iran, Islamic Rep.",4.0
+IRQ,Iraq,
+ISL,Iceland,
+ISR,Israel,4.0
+ITA,Italy,6.0
+JAM,Jamaica,1.0
+JOR,Jordan,
+JPN,Japan,4.0
+KAZ,Kazakhstan,
+KEN,Kenya,9.0
+KGZ,Kyrgyz Republic,
+KHM,Cambodia,
+KIR,Kiribati,
+KNA,St. Kitts and Nevis,
+KOR,"Korea, Rep.",4.0
+KWT,Kuwait,4.0
+LAO,Lao PDR,
+LBN,Lebanon,4.0
+LBR,Liberia,
+LBY,Libya,8.0
+LCA,St. Lucia,1.0
+LIE,Liechtenstein,
+LKA,Sri Lanka,
+LSO,Lesotho,
+LTU,Lithuania,
+LUX,Luxembourg,
+LVA,Latvia,
+MAC,"Macao SAR, China",
+MAR,Morocco,8.0
+MCO,Monaco,
+MDA,Moldova,
+MDG,Madagascar,
+MDV,Maldives,
+MEX,Mexico,2.0
+MHL,Marshall Islands,
+MKD,"Macedonia, FYR",
+MLI,Mali,
+MLT,Malta,
+MMR,Myanmar,
+MNE,Montenegro,
+MNG,Mongolia,
+MNP,Northern Mariana Islands,
+MOZ,Mozambique,9.0
+MRT,Mauritania,
+MSR,Montserrat,
+MTQ,Martinique,
+MUS,Mauritius,
+MWI,Malawi,
+MYS,Malaysia,4.0
+MYT,Mayotte,
+NAM,Namibia,
+NCL,New Caledonia,
+NER,Niger,
+NFK,Norfolk Island,
+NGA,Nigeria,9.0
+NIC,Nicaragua,1.0
+NIU,Niue,
+NLD,Netherlands,6.0
+NOR,Norway,6.0
+NPL,Nepal,
+NRU,Naura,
+NZL,New Zealand,7.0
+OMN,Oman,
+PAK,Pakistan,4.0
+PAN,Panama,1.0
+PER,Peru,3.0
+PHL,Philippines,4.0
+PLW,Palau,
+PNG,Papua New Guinea,
+POL,Poland,5.0
+PRI,Puerto Rico,
+PRK,"Korea, Dem. Rep.",
+PRT,Portugal,6.0
+PRY,Paraguay,3.0
+PSE,West Bank and Gaza,4.0
+PYF,French Polynesia,
+QAT,Qatar,4.0
+REU,Reunion,
+ROU,Romania,5.0
+RUS,Russian Federation,5.0
+RWA,Rwanda,
+SAU,Saudi Arabia,4.0
+SCG,Serbia and Montenegro,
+SDN,Sudan,
+SEN,Senegal,9.0
+SGP,Singapore,4.0
+SHN,Saint Helena,
+SLB,Solomon Islands,
+SLE,Sierra Leone,
+SLV,El Salvador,1.0
+SMR,San Marino,
+SOM,Somalia,
+SPM,Saint Pierre and Miquelon,
+SRB,Serbia,5.0
+STP,Sao Tome and Principe,
+SUR,Suriname,3.0
+SVK,Slovak Republic,
+SVN,Slovenia,
+SWE,Sweden,6.0
+SWZ,Swaziland,
+SYC,Seychelles,
+SYR,Syrian Arab Republic,4.0
+TCA,Turks and Caicos Islands,
+TCD,Chad,
+TGO,Togo,
+THA,Thailand,4.0
+TJK,Tajikistan,
+TKL,Tokelau,
+TKM,Turkmenistan,
+TLS,Timor-Leste,
+TON,Tonga,
+TTO,Trinidad and Tobago,1.0
+TUN,Tunisia,8.0
+TUR,Turkey,6.0
+TUV,Tuvalu,
+TWN,"Taiwan, China",
+TZA,Tanzania,
+UGA,Uganda,
+UKR,Ukraine,5.0
+URY,Uruguay,3.0
+USA,United States,2.0
+UZB,Uzbekistan,
+VAT,SANTA SEDE,6.0
+VCT,St. Vincent and the Grenadines,
+VEN,"Venezuela, RB",3.0
+VGB,"Virgin Islands, British",
+VIR,Virgin Islands (U.S.),
+VNM,Vietnam,4.0
+VUT,Vanuatu,
+WLF,Wallis and Futuna,
+WSM,Samoa,
+XKX,Kosovo,
+YEM,"Yemen, Rep.",
+ZAF,South Africa,9.0
+ZMB,Zambia,
+ZWE,Zimbabwe,
