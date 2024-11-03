@@ -20,6 +20,7 @@
 from Auxiliares.Graficos import graficar
 from Auxiliares.ClasificacionBinaria import clasificacion_binaria
 from Auxiliares.ClasificacionMulticlase import clasificacion_multiclase
+
 import pandas as pd
 
 # Carga del dataset TMNIST
