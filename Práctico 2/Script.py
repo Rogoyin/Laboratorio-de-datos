@@ -26,11 +26,14 @@ import pandas as pd
 # Carga del dataset TMNIST
 df_digitos = pd.read_csv('TMNIST_Data.csv')
 
+# Elegir una carpeta en donde se guardarán todas las visualizaciones o resultados
+ruta_graficos = 'Graficos/'
+
 # Generar todas las visualizaciones relativas al Ejercicio 1 (Análisis Exploratorio)
-graficar(df_digitos, 'Graficos/')
+graficar(df_digitos, ruta_graficos)
 
 # Análisis, entrenamiento y testeo relativos al Ejercicio 2 (Clasificación Binaria)
-clasificacion_binaria()
+clasificacion_binaria(df_digitos, ruta_graficos)
 
 # Análisis, entrenamiento y testeo relativos al Ejercicio 3 (Clasificación Multiclase)
 clasificacion_multiclase()
