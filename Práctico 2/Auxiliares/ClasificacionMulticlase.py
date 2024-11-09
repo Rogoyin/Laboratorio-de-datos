@@ -46,7 +46,7 @@ def entrenar_arbol_decision(x_entrenamiento: pd.DataFrame, y_entrenamiento: pd.S
     modelo.fit(x_entrenamiento, y_entrenamiento)
     return modelo
 
-def evaluar_con_validacion_cruzada(x_entrenamiento: pd.DataFrame, y_entrenamiento: pd.Series, rango_profundidades: range) -> dict:
+def evaluar_con_validacion_cruzada(x_entrenamiento: pd.DataFrame, y_entrenamiento: pd.Series, rango_profundidades: range, ruta_guardado: str = None) -> dict:
 
     """
     Evaluar árboles de decisión con diferentes profundidades utilizando validación cruzada k-fold.
@@ -58,21 +58,37 @@ def evaluar_con_validacion_cruzada(x_entrenamiento: pd.DataFrame, y_entrenamient
     
     Retorna:
         dict: Diccionario con la mejor profundidad y su puntuación correspondiente.
-
     """
 
     mejor_puntuacion = 0
     mejor_profundidad = None
-    
+    puntuaciones_promedio = []  # Lista para almacenar las puntuaciones promedio de cada profundidad.
+
     for profundidad in rango_profundidades:
         modelo = DecisionTreeClassifier(max_depth=profundidad, random_state=42)
         puntuaciones = cross_val_score(modelo, x_entrenamiento, y_entrenamiento, cv=5, scoring='accuracy')  # Validación cruzada k-fold de 5.
         puntuacion_promedio = np.mean(puntuaciones)
         
+        puntuaciones_promedio.append(puntuacion_promedio)
+        
         if puntuacion_promedio > mejor_puntuacion:
             mejor_puntuacion = puntuacion_promedio
             mejor_profundidad = profundidad
     
+    # Graficar las puntuaciones de las diferentes profundidades.
+    plt.figure(figsize=(10, 6))
+    sns.lineplot(x=list(rango_profundidades), y=puntuaciones_promedio, marker='o', color='b', label='Precisión Promedio')
+    plt.xlabel('Profundidad del árbol', fontsize=12)
+    plt.ylabel('Precisión promedio', fontsize=12)
+    plt.grid(True)
+    plt.xticks(rango_profundidades)
+
+    # Guardar o mostrar el gráfico.
+    if ruta_guardado:
+        plt.savefig(ruta_guardado + 'Exactitudes_Arboles', bbox_inches='tight')  # Guarda la imagen en la ruta especificada.
+    else:
+        plt.show()
+
     return {'mejor_profundidad': mejor_profundidad, 'mejor_puntuacion': mejor_puntuacion}
 
 def evaluar_modelo_conjunto_validacion(x_entrenamiento: pd.DataFrame, y_entrenamiento: pd.Series, 
@@ -113,13 +129,12 @@ def evaluar_modelo_conjunto_validacion(x_entrenamiento: pd.DataFrame, y_entrenam
     plt.figure(figsize=(10, 7))
     sns.heatmap(matriz_confusion, annot=True, fmt="d", cmap="Blues", 
                 xticklabels=range(10), yticklabels=range(10))
-    plt.title("Matriz de Confusión")
     plt.xlabel("Predicción")
     plt.ylabel("Verdadero")
 
     # Guardar o mostrar la matriz de confusión.
     if ruta_guardado:
-        plt.savefig(ruta_guardado, bbox_inches='tight')  # Guarda la imagen en la ruta especificada.
+        plt.savefig(ruta_guardado + 'Matriz_Confusion', bbox_inches='tight')  # Guarda la imagen en la ruta especificada.
     else:
         plt.show()  
 
@@ -154,7 +169,7 @@ def clasificacion_multiclase(df: pd.DataFrame, ruta_guardado: str = None):
     # %% Validación cruzada para seleccionar el mejor modelo.
 
     # Realizar validación cruzada en el conjunto de desarrollo.
-    resultado_cv = evaluar_con_validacion_cruzada(x_desarrollo, y_desarrollo, range(1, 11))
+    resultado_cv = evaluar_con_validacion_cruzada(x_desarrollo, y_desarrollo, range(1, 11), ruta_guardado = ruta_guardado)
     print(f"Mejor profundidad según validación cruzada: {resultado_cv['mejor_profundidad']} con precisión CV: {resultado_cv['mejor_puntuacion']:.4f}.")
 
     # %% Evaluación del mejor modelo en el conjunto de validación.
