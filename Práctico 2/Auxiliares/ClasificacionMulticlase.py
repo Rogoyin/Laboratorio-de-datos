@@ -126,6 +126,9 @@ def evaluar_modelo_conjunto_validacion(x_entrenamiento: pd.DataFrame, y_entrenam
 # %% Carga de datos y preparación del conjunto de entrenamiento y validación.
 
 def clasificacion_multiclase(df: pd.DataFrame, ruta_guardado: str = None):
+    print('=====================================')
+    print('  PUNTO 3. CLASIFICACIÓN MULTICLASE')
+    print('=====================================')
     # Separar en variables explicativas (X) y variable objetivo (y).
     x = df.iloc[:, 2:].values  # Características: 784 píxeles de cada imagen.
     y = df.iloc[:, 1].values   # Etiquetas: Dígitos (clase a predecir).
