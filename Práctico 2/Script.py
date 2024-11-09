@@ -36,7 +36,7 @@ graficar(df_digitos, ruta_graficos)
 clasificacion_binaria(df_digitos, ruta_graficos)
 
 # Análisis, entrenamiento y testeo relativos al Ejercicio 3 (Clasificación Multiclase)
-clasificacion_multiclase()
+clasificacion_multiclase(df_digitos, ruta_graficos)
 
 
 
