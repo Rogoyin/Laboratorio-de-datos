@@ -118,6 +118,12 @@ def generar_heatmaps_diferencias(df_digitos: pd.DataFrame, ruta_destino: str, di
     # La matriz de 28x28 comienza con ceros
     matriz_variabilidad_diferencias = [[0]*28 for z in range(28)]
     
+    # Variables para el cálculo de la Sección 2.4 del informe (opcional, no hace al gráfico)
+    s1 = 0
+    s2 = 0
+    umbral = 12 # de 255
+    u = 0
+    
     for col in columnas:
         x, y = 0, 0
         col_num = int(col)
@@ -133,9 +139,16 @@ def generar_heatmaps_diferencias(df_digitos: pd.DataFrame, ruta_destino: str, di
 
         # Almacenar la diferencia simétrica de valores únicos de intensidad del pixel (x,y) en escala de grises
         matriz_variabilidad_diferencias[y][x] = len(set(df_digito_1[col].unique()).symmetric_difference(set(df_digito_2[col].unique())))
+
+        # Calculo de variables para cuantificadores de similitud de la Sección 2.4
+        s1 = s1 + matriz_variabilidad_diferencias[y][x]
+        if matriz_variabilidad_diferencias[y][x] >= umbral:
+            s2 = s2 + matriz_variabilidad_diferencias[y][x]
+            u = u + 1
         
     # Cambiar a tipo np.array para graficar
     matriz_variabilidad_diferencias = np.array(matriz_variabilidad_diferencias)
+
     
     # Crear el heatmap
     # plt.title('Diferencia simétrica entre valores únicos de pixeles entre digitos ' + str(digito1) + ' y ' + str(digito2))
@@ -145,6 +158,12 @@ def generar_heatmaps_diferencias(df_digitos: pd.DataFrame, ruta_destino: str, di
     plt.xlabel('Eje X')
     plt.ylabel('Eje Y')
     plt.savefig(ruta_destino + 'Diferencia simetrica entre ' + str(digito1) + ' y ' + str(digito2) + '.png')
+
+    # Cálculo final de cuantificadores
+    s1 = s1 / (784*256)
+    s2 = s2 / (u*256)
+    print('Cuantificador S1 entre dígitos' + str(digito1) + ' y ' + str(digito2) + ': ' + str(s1))
+    print('Cuantificador S2 entre dígitos' + str(digito1) + ' y ' + str(digito2) + ': ' + str(s2))
     
 
 # %% # Gráficos de heatmap de promedio de diferencias entre dígitos
