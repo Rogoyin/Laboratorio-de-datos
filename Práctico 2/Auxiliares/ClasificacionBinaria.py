@@ -43,9 +43,9 @@ def clasificacion_binaria(df_digitos: pd.DataFrame, ruta_graficos: str):
     # %% ETAPA 3: Ajustar un modelo de KNN considerando distintas triplas de atributos
     
     # Se elijen distintas tuplas (x_1, y_1, x_2, y_2, x_3, y_3) para seleccionar los atributos correspondientes
-    t1 = (0, 0, 13, 13, 27, 27)
-    t2 = (13, 0, 13, 13, 13, 27)
-    t3 = (13, 10, 13, 13, 13, 16)
+    t1 = (10, 9, 15, 19, 21, 22)
+    t2 = (8, 10, 15, 25, 22, 14)
+    t3 = (15, 3, 15, 11, 22, 11)
 
     # Se preparan los dataframes train en función de los atributos elegidos en t1, t2, t3
     # Cada tX contiene 3 coordenadas (x, y), por lo que se convierten a columnas (con aplanar(...)) y se eligen sólo las tres columnas correspondientes
