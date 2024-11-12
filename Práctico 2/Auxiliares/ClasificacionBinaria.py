@@ -19,7 +19,7 @@ def aplanar(x: int, y: int):
     # Esto sirve para convertir fácilmente una coordenada a una columna del dataset de dígitos
     return (x*28) + y + 1
 
-def clasificacion_binaria(df_digitos: pd.DataFrame, ruta_graficos: str):
+def clasificacion_binaria(df_digitos: pd.DataFrame, ruta_graficos: str, k: int):
     # %% ETAPA 1: Construccion de un nuevo dataframe sólo con dígitos 0 y 1 y balanceo
     df_ceros_unos = df_digitos[(df_digitos['labels'] == 0) | (df_digitos['labels'] == 1)].copy()
 
@@ -57,9 +57,9 @@ def clasificacion_binaria(df_digitos: pd.DataFrame, ruta_graficos: str):
     Y = train['labels']
 
     # Creación de los modelos KNN (con K = 5)
-    modelo_1 = KNeighborsClassifier(n_neighbors = 5)
-    modelo_2 = KNeighborsClassifier(n_neighbors = 5)
-    modelo_3 = KNeighborsClassifier(n_neighbors = 5)
+    modelo_1 = KNeighborsClassifier(n_neighbors = k)
+    modelo_2 = KNeighborsClassifier(n_neighbors = k)
+    modelo_3 = KNeighborsClassifier(n_neighbors = k)
 
     # Entrenar los modelos
     modelo_1.fit(X_1, Y)
@@ -79,9 +79,16 @@ def clasificacion_binaria(df_digitos: pd.DataFrame, ruta_graficos: str):
     Y_2_pred = modelo_2.predict(X_2_test)
     Y_3_pred = modelo_3.predict(X_3_test)
 
+    #Scores
+    a1 = metrics.accuracy_score(Y_test, Y_1_pred)
+    a2 = metrics.accuracy_score(Y_test, Y_2_pred)
+    a3 = metrics.accuracy_score(Y_test, Y_3_pred)
+
     # Chequear métrica de exactitud
-    print("Exactitud del modelo 1:", metrics.accuracy_score(Y_test, Y_1_pred))
-    print("Exactitud del modelo 2:", metrics.accuracy_score(Y_test, Y_2_pred))
-    print("Exactitud del modelo 3:", metrics.accuracy_score(Y_test, Y_3_pred))
+    print("Exactitud del modelo 1:", a1)
+    print("Exactitud del modelo 2:", a2)
+    print("Exactitud del modelo 3:", a3)
+
+    return a1, a2, a3
 
 
