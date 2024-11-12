@@ -75,7 +75,7 @@ def clasificar_tres_atributos(train: pd.DataFrame, test: pd.DataFrame):
 
 def clasificar_variando_atributos(train: pd.DataFrame, test: pd.DataFrame, ruta_graficos: str):
     # Se varía entre una y diez coordenadas, elegidas "aleatoriamente" y se mide la exactitud para cada cantidad de atributos (coordenadas) a utilizar
-    coordenadas = [(8, 16), (15, 25), (22,14), (15, 15), (15, 6), (20, 23), (10, 9), (20, 6), (25, 15), (15, 3)]
+    coordenadas = [(8, 16), (15, 25), (22,14), (20, 20), (15, 6), (20, 23), (15, 15), (20, 6), (10, 9), (25, 15)]
 
     # Aplicar a cada coordenada la función aplanar, para obtener los atributos exactos a utilizar en el dataframe
     # Esto resultará en ['241', '446', '631', '436', '427', '584', '290', '567', '716', '424']
