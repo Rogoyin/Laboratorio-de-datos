@@ -36,7 +36,11 @@ def graficar(df_digitos: pd.DataFrame, ruta_destino: str):
 
     # Generacion de las 29.900 imágenes (OJO, demora ~2 min) 
         # generar_imagenes_raw(df_digitos, ruta_destino + 'Raw/')
-    generar_grafico_proyecciones0(df_digitos, ruta_destino)
+
+    #Item 1.c. Atencion, tarda más de 10min
+    #generar_grafico_proyecciones0(df_digitos, ruta_destino)
+    
+    #Comparacion de la clasificacion binaria para las 3 ternas y distintos k's.
     generar_grafico_binaria_k(df_digitos, ruta_destino)
 
 
