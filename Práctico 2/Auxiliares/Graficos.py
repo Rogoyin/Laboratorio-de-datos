@@ -171,8 +171,68 @@ def generar_heatmaps_promedio_diferencias(df_digitos: pd.DataFrame, ruta_destino
     # TODO
     pass
 
+# Gráfico para el item 1.c), donde se pide comparar la similitud del las imagenes de la clase 0
+def generar_grafico_proyecciones0(df_digitos: pd.DataFrame, ruta_destino: str):
 
-
+    import numpy as np
+        
+    data = df_digitos #renombre
+    
+    # Separo en imgs (matrices de 28 x 28) y Labels (que dígito es cada una)
+    imgs = data.drop(['names', 'labels'], axis = 1)
+    imgs = imgs.values.reshape(data.shape[0], 28, 28)
+    labels = data[['names', 'labels']]
+    
+    # imagenes de cada numero
+    imgs_num = []
+    names_num = []
+    
+    for i in range(10):
+      ims = data[data['labels'] == i].drop(['names', 'labels'], axis = 1)
+      imgs_num.append((ims.values.reshape(data[data['labels'] == i].shape[0], 28, 28)))
+      names_num.append(data[data['labels'] == i]['names'])
+    
+    #funcion de proyeccion entre dos matrices
+    def corr(img1, img2):
+      img1 = img1.flatten()
+      img2 = img2.flatten()
+      proy = np.dot(img1, img2) / (np.linalg.norm(img1) * np.linalg.norm(img2))
+      return proy
+    
+    
+    corrs = np.zeros((10,10)) # matriz de correlacion entre los digitos
+    
+    
+    #Todos los 0's contra todos los otros digitos
+    for i in range(1,10):
+      n= 0
+      for i1, im in enumerate(imgs_num[0]):
+        for i2, im2 in enumerate(imgs_num[i]):
+          corrs[0,i] += corr(im, im2)
+          n+=1
+    
+      corrs[0,i] /= n #Promedio
+      #print(corrs[0,i], n)
+    
+    #Todos los 0's contra todos los 0's
+    n= 0
+    
+    for i1, im in enumerate(imgs_num[0]):
+      for i2, im2 in enumerate(imgs_num[0]):
+        if(i1 >= i2): continue #no repito cuentas
+        corrs[0,0] += corr(im, im2)
+        n+=1
+    
+    corrs[0,0] /= n #promedio
+    #print(corrs[0,0], n)
+    
+    
+    #Grafico
+    plt.bar(range(10), corrs[0, :])
+    plt.xlabel("Clases de dígitos")
+    plt.ylabel("Similitud promedio con la clase '0' ")
+    plt.xticks(range(10))
+    plt.savefig(ruta_destino + 'grafico1c.png')
 
 
 # %% # Generacion de todas las imagenes en formato PNG
