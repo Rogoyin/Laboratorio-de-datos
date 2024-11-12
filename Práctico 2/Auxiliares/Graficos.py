@@ -36,7 +36,8 @@ def graficar(df_digitos: pd.DataFrame, ruta_destino: str):
 
     # Generacion de las 29.900 imágenes (OJO, demora ~2 min) 
         # generar_imagenes_raw(df_digitos, ruta_destino + 'Raw/')
-
+    generar_grafico_proyecciones0(df_digitos, ruta_destino)
+    generar_grafico_binaria_k(df_digitos, ruta_destino)
 
 
 '''
@@ -235,6 +236,39 @@ def generar_grafico_proyecciones0(df_digitos: pd.DataFrame, ruta_destino: str):
     plt.savefig(ruta_destino + 'grafico1c.png')
 
 
+#Compara el accuracy de la clasificacion binaria para distintos valores de k
+def generar_grafico_binaria_k(df_digitos: pd.DataFrame, ruta_destino: str):
+
+    #Accuracys en funcion de k para cada terna de píxels (T1, T2, T3) 
+    scores1 = []
+    scores2 = []
+    scores3 = []
+
+    ks = range(3,40)
+    
+    for k in ks:
+        print(f'k = {k}')
+        a1, a2, a3 = clasificacion_binaria(df_digitos, ruta_graficos, k)
+        print()
+        
+        scores1.append(a1)
+        scores2.append(a2)
+        scores3.append(a3)
+
+        #Grafico
+        plt.xlabel('k')
+        plt.ylabel('Accuracy')
+        
+        plt.plot(ks, a1, label = 'T1')
+        plt.plot(ks, a2, label = 'T2')
+        plt.plot(ks, a3, label = 'T3')
+
+        plt.legend()
+        plt.savefig(ruta_destino + 'binaria_ks.png')
+        
+
+
+    
 # %% # Generacion de todas las imagenes en formato PNG
 def generar_imagenes_raw(df_digitos: pd.DataFrame, ruta_destino: str):
     ancho_img = 28
