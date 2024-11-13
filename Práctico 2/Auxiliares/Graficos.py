@@ -37,11 +37,11 @@ def graficar(df_digitos: pd.DataFrame, ruta_destino: str):
     # Generacion de las 29.900 imágenes (OJO, demora ~2 min) 
         # generar_imagenes_raw(df_digitos, ruta_destino + 'Raw/')
 
-    #Item 1.c. Atencion, tarda más de 10min
-    #generar_grafico_proyecciones0(df_digitos, ruta_destino)
+    # Item 1.c. Atencion, tarda más de 10min
+    # generar_grafico_proyecciones0(df_digitos, ruta_destino)
     
-    #Comparacion de la clasificacion binaria para las 3 ternas y distintos k's.
-    #generar_grafico_binaria_k(df_digitos, ruta_destino)
+    # [DEPRECATED] Comparacion de la clasificacion binaria para las 3 ternas y distintos k's.
+    # generar_grafico_binaria_k(df_digitos, ruta_destino)
 
 
 '''
@@ -239,6 +239,7 @@ def generar_grafico_proyecciones0(df_digitos: pd.DataFrame, ruta_destino: str):
     plt.xticks(range(10))
     plt.savefig(ruta_destino + 'grafico1c.png')
 
+
 '''
 #Compara el accuracy de la clasificacion binaria para distintos valores de k
 def generar_grafico_binaria_k(df_digitos: pd.DataFrame, ruta_destino: str):
@@ -274,7 +275,6 @@ def generar_grafico_binaria_k(df_digitos: pd.DataFrame, ruta_destino: str):
         plt.savefig(ruta_destino + 'binaria_ks.png')
 ''' 
 
-
     
 # %% # Generacion de todas las imagenes en formato PNG
 def generar_imagenes_raw(df_digitos: pd.DataFrame, ruta_destino: str):
@@ -300,20 +300,3 @@ def generar_imagenes_raw(df_digitos: pd.DataFrame, ruta_destino: str):
         img = img.resize((ancho_img * 10, alto_img * 10), resample=Image.NEAREST)
         img.save(ruta_destino + fuente + ' - Digito ' + str(digito) + '.png')
 
-
-########################
-###### DEPRECATE #######
-########################
-
-    '''
-    Hay veces que es bueno mezclar (para Kfold) al azar y a veces no, depende del problema
-        Hay veces que es malo: los datos tenían correlación entre las muestras (serie de tiempo -- mezclar rompe la estructura)
-        A veces la meustra tiene otras correlaciones y es malo mezclar:
-            Datos de audio (personas hablando) , identificar las personas
-                Si el entrenamiento es con datos que uso tanto en training como en test, entonces no sabe predecir escenarios reales
-                Si tengo 5 audios de A, B, C y D, DEBO usar todos los de A o bien en test o en training, no ponerlo en ambos... 
-                    sino no aprende a detectar ladrones por ejemplo con voces nuevas
-
-
-                    SKLEARN -- STRATIFY (es para hacer cross con K-fold en python)
-    '''
