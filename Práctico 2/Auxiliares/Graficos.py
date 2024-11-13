@@ -243,7 +243,7 @@ def generar_grafico_proyecciones0(df_digitos: pd.DataFrame, ruta_destino: str):
 #Compara el accuracy de la clasificacion binaria para distintos valores de k
 def generar_grafico_binaria_k(df_digitos: pd.DataFrame, ruta_destino: str):
     
-    from ClasificacionBinaria import clasificacion_binaria
+    from Auxiliares.ClasificacionBinaria import clasificacion_binaria
 
     #Accuracys en funcion de k para cada terna de píxels (T1, T2, T3) 
     scores1 = []
