@@ -4,9 +4,17 @@
     - Dumas, Román
     - Nogueroles, Patricio
 
-    El método principal, clasificacion_binaria(), se divide en las siguientes etapas:
+    El método principal, clasificacion_binaria(), el cual se ubica al final del archivo, se divide en las siguientes etapas:
         1. Construcción de un nuevo dataframe que contenga sólo los dígitos 0 y 1
         2. Separar los datos en conjuntos de train y test
+        3. Ajustar modelos KNN variando los atributos
+        4. Ajustar modelos KNN variando el K y los atributos
+
+    Precondiciones
+        Contar con las librerías sklearn, pandas y matplotlib
+
+    Aclaración:
+        Se presentan en principio las funciones auxiliares, pero la función principal clasificacion_binaria() está definida al final y sigue el orden del enunciado
 '''
 
 from sklearn.model_selection import train_test_split
@@ -124,7 +132,8 @@ def clasificar_variando_atributos(train: pd.DataFrame, test: pd.DataFrame, ruta_
         scores.append(metrics.accuracy_score(Y_test, Y_predict))
 
     # Guardar el gráfico generado
-    plt.plot([1,2,3,4,5,6,7,8,9,10], scores, label='Serie de coordenadas', marker='o')
+    plt.clf()
+    plt.plot(range(1,11), scores, label='Serie de coordenadas', marker='o')
     plt.xlabel('Cantidad de atributos')
     plt.ylabel('Exactitud del modelo')
     plt.xticks(range(1,11))
@@ -137,9 +146,77 @@ def clasificar_variando_atributos(train: pd.DataFrame, test: pd.DataFrame, ruta_
     for i in range(0, len(scores)):
         print("Exactitud del modelo", str(i), ":", str(scores[i]))
 
-    
 
-    
+def clasificar_variando_k(train: pd.DataFrame, test: pd.DataFrame, k_list: list, ruta_graficos: str):
+    # Se eligen nuevas diez coordenadas para ver cómo varía la exactitud a medida que se agregan atributos, al igual que en la función clasificar_variando_atributos, pero haciéndolo para distintos k
+    coordenadas = [(4, 7), (7,6), (23, 7), (9, 9), (20, 6), (15, 3), (15, 25), (20, 6), (17, 23),(10, 18) ]
+
+    # Aplicar a cada coordenada la función aplanar, para obtener los atributos exactos a utilizar en el dataframe
+    # Esto resultará en ['120', '203', '652', '262', '567', '424', '446', '567', '500', '299']
+    atributos = [str(aplanar(c1, c2)) for (c1, c2) in coordenadas]
+
+    # Se generarán diez modelos a entrenar, cada uno agregando un nuevo atributo respecto del modelo anterior
+    # Es decir, resultará en una lista [['120'], ['120', '203'], ['120', '203', '652'], ...]
+    atributos_acum = []
+    for i in range(0, len(atributos)):
+        atributos_acum.append(atributos[0:(i+1)])
+
+    # Una lista de valores X que serán dataframes train (habrá uno por cada tupla)
+    X_list = [] 
+    for attrs in atributos_acum:
+        # Se utilizan los atributos a_1, a_2, ..., a_i para generar el dataframe train "X_i"
+        X_list.append(train[attrs])
+
+    # El atributo de testeo será igual para todos los train
+    Y = train['labels']
+
+    scores_total = []
+    # Entrenar los modelos variando el K en función de la lista pasada como parámetro
+    for k in k_list:
+        models = []
+        for X in X_list:
+            # Además de crearlos, se los entrena ya con su correspondiente X (de X_list)
+            models.append(KNeighborsClassifier(n_neighbors = k).fit(X, Y))
+        
+        
+        # Una lista de valores X_test, que serán el subconjunto de test correspondiente a cada tupla
+        X_test_list = []
+        for attrs in atributos_acum:
+            # Se utilizan los atributos a_1, a_2, ..., a_i para generar el dataframe test "X_test_i"
+            X_test_list.append(test[attrs])
+        
+        # El atributo de testeo será igual para todos los X_test
+        Y_test = test['labels']
+        
+        # Realizar predicciones por cada modelo y agregarlas en orden en Y_predict_list
+        Y_predict_list = []
+        for i in range(0, len(models)):
+            Y_predict_list.append(models[i].predict(X_test_list[i]))
+        
+        # Chequear la exactitud (accuracy) de cada conjunto de predicciones
+        scores = []
+        for Y_predict in Y_predict_list:
+            scores.append(metrics.accuracy_score(Y_test, Y_predict))
+
+        scores_total.append(scores)
+            
+    # Guardar el gráfico generado
+    plt.clf()
+    for i in range(0,len(scores_total)):
+        plt.plot(range(1,11), scores_total[i], label='K = '+str(k_list[i]), marker='o')
+        
+    plt.xlabel('Cantidad de atributos')
+    plt.ylabel('Exactitud del modelo')
+    plt.xticks(range(1,11))
+    plt.legend()
+    plt.grid(True)
+    plt.savefig(ruta_graficos + 'Clasificacion Binaria - 2.D - Variacion de K y Atributos.png')
+            
+
+
+
+
+
 '''
     FUNCIÓN PRINCIPAL
 '''
@@ -154,8 +231,8 @@ def clasificacion_binaria(df_digitos: pd.DataFrame, ruta_graficos: str):
     assert df_ceros.shape[0] == df_unos.shape[0], "Error: hay distinta cantidad de ceros y unos en el subconjunto df_ceros_unos"
     assert df_ceros.groupby('names')['names'].count().equals(df_unos.groupby('names')['names'].count()), "Error"
 
+
     # %% ETAPA 2: Separar los datos en conjuntos de train y test
-    
     # Se realiza una partición aleatoria (aunque con una semilla/seed definida, para poder reproducir el mismo resultado en distintas ejecuciones)
     # El 80% será destinado a train y 20% a test
     train_ceros, test_ceros = train_test_split(df_ceros, test_size=0.2, random_state=42)
@@ -164,78 +241,17 @@ def clasificacion_binaria(df_digitos: pd.DataFrame, ruta_graficos: str):
     train = pd.concat([train_ceros, train_unos], ignore_index=True, sort=False)
     test = pd.concat([test_ceros, test_unos], ignore_index=True, sort=False)
 
-    # %% ETAPA 3: Ajustar un modelo de KNN considerando distintas triplas de atributos
 
+    # %% ETAPA 3: Ajustar modelos de KNN considerando distintos atributos
     # Se clasifica eligiendo tres distintos conjuntos de tres atributos cada uno (Ejercicio 2.C, parte 1)
     clasificar_tres_atributos(train, test)
 
-    # COMPLETAR
+    # Se clasifica variando la cantidad de atributos, dado una lista de coordenadas a elegir (Ejercicio 2.C, parte 2)
     clasificar_variando_atributos(train, test, ruta_graficos)
 
 
-    # Además, se variarán los valores de k para poder graficar
-    k_values = [1,2,3,5,8,13,21,34]
 
-    
-
-    # Se clasifica eligiendo tres distintos conjuntos de tres atributos cada uno y variando los valores de k (Ejercicio 2.D)
-    #clasificar_variando_k(train, test, k_values, tuplas, ruta_graficos)
-
-
-
-
-
-
-
-
-
-
-
-'''
-def clasificar_variando_k(train: pd.DataFrame, test: pd.DataFrame, k: list, tuplas: list, ruta_graficos: str):
-
-
-    # Se preparan los dataframes train en función de los atributos elegidos en t1, t2, t3
-    # Cada tX contiene 3 coordenadas (x, y), por lo que se convierten a columnas (con aplanar(...)) y se eligen sólo las tres columnas correspondientes
-    X_1 = train[[str(aplanar(t1[0], t1[1])), str(aplanar(t1[2], t1[3])), str(aplanar(t1[4], t1[5]))]]
-    X_2 = train[[str(aplanar(t2[0], t2[1])), str(aplanar(t2[2], t2[3])), str(aplanar(t2[4], t2[5]))]]
-    X_3 = train[[str(aplanar(t3[0], t3[1])), str(aplanar(t3[2], t3[3])), str(aplanar(t3[4], t3[5]))]]
-
-    # El atributo de testeo será igual para todos los train
-    Y = train['labels']
-
-    # Creación de los modelos KNN (con K = 5)
-    modelo_1 = KNeighborsClassifier(n_neighbors = k)
-    modelo_2 = KNeighborsClassifier(n_neighbors = k)
-    modelo_3 = KNeighborsClassifier(n_neighbors = k)
-
-    # Entrenar los modelos
-    modelo_1.fit(X_1, Y)
-    modelo_2.fit(X_2, Y)
-    modelo_3.fit(X_3, Y)
-
-    # Preparar los datos X_test para generar predicciones
-    X_1_test = test[[str(aplanar(t1[0], t1[1])), str(aplanar(t1[2], t1[3])), str(aplanar(t1[4], t1[5]))]]
-    X_2_test = test[[str(aplanar(t2[0], t2[1])), str(aplanar(t2[2], t2[3])), str(aplanar(t2[4], t2[5]))]]
-    X_3_test = test[[str(aplanar(t3[0], t3[1])), str(aplanar(t3[2], t3[3])), str(aplanar(t3[4], t3[5]))]]
-
-    # El atributo de testeo será igual para todos los X_test
-    Y_test = test['labels']
-
-    # Realizar predicciones
-    Y_1_pred = modelo_1.predict(X_1_test)
-    Y_2_pred = modelo_2.predict(X_2_test)
-    Y_3_pred = modelo_3.predict(X_3_test)
-
-    #Scores
-    a1 = metrics.accuracy_score(Y_test, Y_1_pred)
-    a2 = metrics.accuracy_score(Y_test, Y_2_pred)
-    a3 = metrics.accuracy_score(Y_test, Y_3_pred)
-
-    # Chequear métrica de exactitud
-    print("Exactitud del modelo 1:", a1)
-    print("Exactitud del modelo 2:", a2)
-    print("Exactitud del modelo 3:", a3)
-
-    pass
-'''
+    # %% ETAPA 4: Ajustar modelos de KNN considerando distintos valores de k y atributos
+    # Se clasifica variando la cantidad de atributos y el K del algoritmo KNN (Ejercicio 2.D)
+    k_values = [1, 3, 7, 15, 30]
+    clasificar_variando_k(train, test, k_values, ruta_graficos)

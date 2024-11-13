@@ -41,7 +41,7 @@ def graficar(df_digitos: pd.DataFrame, ruta_destino: str):
     #generar_grafico_proyecciones0(df_digitos, ruta_destino)
     
     #Comparacion de la clasificacion binaria para las 3 ternas y distintos k's.
-    generar_grafico_binaria_k(df_digitos, ruta_destino)
+    #generar_grafico_binaria_k(df_digitos, ruta_destino)
 
 
 '''
@@ -239,7 +239,7 @@ def generar_grafico_proyecciones0(df_digitos: pd.DataFrame, ruta_destino: str):
     plt.xticks(range(10))
     plt.savefig(ruta_destino + 'grafico1c.png')
 
-
+'''
 #Compara el accuracy de la clasificacion binaria para distintos valores de k
 def generar_grafico_binaria_k(df_digitos: pd.DataFrame, ruta_destino: str):
     
@@ -272,7 +272,7 @@ def generar_grafico_binaria_k(df_digitos: pd.DataFrame, ruta_destino: str):
 
         plt.legend()
         plt.savefig(ruta_destino + 'binaria_ks.png')
-        
+''' 
 
 
     
