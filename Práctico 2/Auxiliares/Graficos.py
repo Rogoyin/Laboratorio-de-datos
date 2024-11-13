@@ -262,12 +262,13 @@ def generar_grafico_binaria_k(df_digitos: pd.DataFrame, ruta_destino: str):
         scores3.append(a3)
 
         #Grafico
+        plt.figure()
         plt.xlabel('k')
         plt.ylabel('Accuracy')
         
-        plt.plot(ks, a1, label = 'T1')
-        plt.plot(ks, a2, label = 'T2')
-        plt.plot(ks, a3, label = 'T3')
+        plt.plot(ks, scores1, label = 'T1')
+        plt.plot(ks, scores2, label = 'T2')
+        plt.plot(ks, scores3, label = 'T3')
 
         plt.legend()
         plt.savefig(ruta_destino + 'binaria_ks.png')
